@@ -7,7 +7,7 @@ Home-Chores is a lightweight web application for managing household tasks. Desig
 
 ## Features
 
-### MVP
+### 🎯 MVP
 - **Weekly chores**: Create repeating tasks that reset every week
 - **Offline-first**: Fully functional without internet connection
 - **Cross-device sync**: Automatic synchronization when devices reconnect
@@ -29,8 +29,8 @@ Home-Chores is a lightweight web application for managing household tasks. Desig
 
 1. **Clone the repository**:
    ```bash
-   git clone https://github.com/el-apps/home-chores.git
-   cd home-chores
+   git clone https://github.com/el-apps/Home-Chores.git
+   cd Home-Chores
    ```
 2. **Start the application**:
    ```bash
