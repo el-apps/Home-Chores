@@ -3,7 +3,7 @@
 
 Home-Chores is a lightweight web application for managing household tasks. Designed for families, it prioritizes offline functionality, data privacy, and seamless synchronization across devices without relying on third-party services.
 
-![Elm](https://img.shields.io/badge/Elm-0.19.1-blue) ![Go](https://img.shields.io/badge/Go-1.24-blue)
+![Elm](https://img.shields.io/badge/Elm-0.19.1-1293D8) ![Go](https://img.shields.io/badge/Go-1.24-00ADD8)
 
 ## Features
 
