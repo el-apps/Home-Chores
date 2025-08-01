@@ -6,7 +6,6 @@ import Html.Attributes exposing (..)
 import Html.Events exposing (onClick, onInput)
 
 
-
 -- MAIN
 
 
@@ -32,8 +31,7 @@ init =
 
 
 type Msg
-    = Increment
-    | Decrement
+    = UpdateCount Int
     | Reset
     | UpdateText String
 
@@ -41,11 +39,8 @@ type Msg
 update : Msg -> Model -> Model
 update msg model =
     case msg of
-        Increment ->
-            { model | count = model.count + 1 }
-
-        Decrement ->
-            { model | count = model.count - 1 }
+        UpdateCount delta ->
+            { model | count = model.count + delta }
 
         Reset ->
             { model | count = 0 }
@@ -61,9 +56,9 @@ update msg model =
 view : Model -> Html Msg
 view model =
     div []
-        [ button [ onClick Decrement ] [ text "-" ]
+        [ button [ onClick (UpdateCount -1) ] [ text "-" ]
         , div [] [ text (String.fromInt model.count) ]
-        , button [ onClick Increment ] [ text "+" ]
+        , button [ onClick (UpdateCount 1) ] [ text "+" ]
         , button [ onClick Reset ] [ text "reset!" ]
         , input [ placeholder "Text to reverse", value model.text, onInput UpdateText ] []
         , div [] [ text (String.reverse model.text) ]
