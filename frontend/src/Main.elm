@@ -1,9 +1,10 @@
 module Main exposing (..)
 
 import Browser
-import Html exposing (Html, button, div, input, text)
+import Html exposing (Html, button, div, h1, input, p, text)
 import Html.Attributes exposing (..)
 import Html.Events exposing (onClick, onInput)
+
 
 
 -- MAIN
@@ -18,12 +19,15 @@ main =
 
 
 type alias Model =
-    { count : Int, text : String }
+    { name : String
+    , password : String
+    , confirmPassword : String
+    }
 
 
 init : Model
 init =
-    { count = 314, text = "" }
+    Model "" "" ""
 
 
 
@@ -31,22 +35,22 @@ init =
 
 
 type Msg
-    = UpdateCount Int
-    | Reset
-    | UpdateText String
+    = Name String
+    | Password String
+    | ConfirmPassword String
 
 
 update : Msg -> Model -> Model
 update msg model =
     case msg of
-        UpdateCount delta ->
-            { model | count = model.count + delta }
+        Name newName ->
+            { model | name = newName }
 
-        Reset ->
-            { model | count = 0 }
+        Password newPassword ->
+            { model | password = newPassword }
 
-        UpdateText newText ->
-            { model | text = newText }
+        ConfirmPassword newConfirmPassword ->
+            { model | confirmPassword = newConfirmPassword }
 
 
 
@@ -56,10 +60,15 @@ update msg model =
 view : Model -> Html Msg
 view model =
     div []
-        [ button [ onClick (UpdateCount -1) ] [ text "-" ]
-        , div [] [ text (String.fromInt model.count) ]
-        , button [ onClick (UpdateCount 1) ] [ text "+" ]
-        , button [ onClick Reset ] [ text "reset!" ]
-        , input [ placeholder "Text to reverse", value model.text, onInput UpdateText ] []
-        , div [] [ text (String.reverse model.text) ]
-        ]
+        ([ h1 [] [ text "Login" ]
+         , input [ value model.name, onInput Name ] []
+         , input [ value model.password, type_ "password", onInput Password ] []
+         , input [ value model.confirmPassword, type_ "password", onInput ConfirmPassword ] []
+         ]
+            ++ (if model.password /= model.confirmPassword then
+                    [ p [] [ text "Passwords do not match!" ] ]
+
+                else
+                    []
+               )
+        )
