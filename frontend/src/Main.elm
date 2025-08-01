@@ -61,9 +61,9 @@ view : Model -> Html Msg
 view model =
     div []
         ([ h1 [] [ text "Login" ]
-         , input [ value model.name, onInput Name ] []
-         , input [ value model.password, type_ "password", onInput Password ] []
-         , input [ value model.confirmPassword, type_ "password", onInput ConfirmPassword ] []
+         , viewInput "text" "Name" model.name Name
+         , viewInput "password" "Password" model.password Password
+         , viewInput "password" "Re-enter Password" model.confirmPassword ConfirmPassword
          ]
             ++ (if model.password /= model.confirmPassword then
                     [ p [] [ text "Passwords do not match!" ] ]
@@ -72,3 +72,8 @@ view model =
                     []
                )
         )
+
+
+viewInput : String -> String -> String -> (String -> msg) -> Html msg
+viewInput t p v toMsg =
+    input [ type_ t, placeholder p, value v, onInput toMsg ] []
