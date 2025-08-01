@@ -12,10 +12,14 @@
     <script src="elm.js"></script>
   </head>
   <body>
+    <div id="root"></div>
     <script>
       var storageKey = "store";
       var flags = localStorage.getItem(storageKey);
-      var app = Elm.Main.init({flags: flags});
+      var app = Elm.Main.init({
+        flags: flags,
+        node: document.getElementById('root'),
+      });
 
       app.ports.storeCache.subscribe(function(val) {
 
