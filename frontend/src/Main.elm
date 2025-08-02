@@ -1,33 +1,64 @@
-module Main exposing (..)
+port module Main exposing (..)
 
 import Browser
-import Html exposing (Html, button, div, h1, input, p, text)
+import Html exposing (..)
 import Html.Attributes exposing (..)
-import Html.Events exposing (onClick, onInput)
+import Json.Decode exposing (Value)
+import Time
 
 
 
 -- MAIN
 
 
+main : Program () Model Msg
 main =
-    Browser.sandbox { init = init, update = update, view = view }
+    Browser.element { init = init, view = view, update = update, subscriptions = subscriptions }
+
+
+
+-- PORTS
+
+
+port pushData : Value -> Cmd msg
+
+
+port onNewHistory : (Value -> msg) -> Sub msg
 
 
 
 -- MODEL
 
 
-type alias Model =
-    { name : String
-    , password : String
-    , confirmPassword : String
+type Chore
+    = RepeatedWeekly
+        { uuid : String
+        , name : String
+        , day : Time.Weekday
+        }
+
+
+type alias ChoreCompletion =
+    { choreUuid : String
+    , timestamp : Time.Posix
     }
 
 
-init : Model
-init =
-    Model "" "" ""
+type alias Model =
+    { chores : List Chore
+    , completedChores : List ChoreCompletion
+    }
+
+
+init : () -> ( Model, Cmd Msg )
+init _ =
+    ( Model
+        [ RepeatedWeekly { uuid = "c892a6cb-cfbc-4d05-8888-28b54f0ffe90", name = "Take out the trash", day = Time.Wed }
+        , RepeatedWeekly { uuid = "228a6965-28e2-4026-b6a9-6c0cc4a57026", name = "Mow the yard", day = Time.Tue }
+        ]
+        []
+    , Cmd.none
+    )
 
 
 
@@ -35,22 +66,20 @@ init =
 
 
 type Msg
-    = Name String
-    | Password String
-    | ConfirmPassword String
+    = NewHistory Value
+    | AddChore Chore
 
 
-update : Msg -> Model -> Model
+update : Msg -> Model -> ( Model, Cmd Msg )
 update msg model =
     case msg of
-        Name newName ->
-            { model | name = newName }
+        NewHistory _ ->
+            -- TODO: incorporate new data from outside
+            ( model, Cmd.none )
 
-        Password newPassword ->
-            { model | password = newPassword }
-
-        ConfirmPassword newConfirmPassword ->
-            { model | confirmPassword = newConfirmPassword }
+        AddChore _ ->
+            -- TODO: add chore
+            ( model, Cmd.none )
 
 
 
@@ -59,25 +88,58 @@ update msg model =
 
 view : Model -> Html Msg
 view model =
-    div []
-        [ h1 [] [ text "Login" ]
-        , viewInput "text" "Name" model.name Name
-        , viewInput "password" "Password" model.password Password
-        , viewInput "password" "Re-enter Password" model.confirmPassword ConfirmPassword
-        , viewValidation model
-        , p [] [ text "Chore 1 - make login work" ]
-        ]
+    node "main"
+        [ class "container" ]
+        (nav [] [ ul [] [ h1 [] [ text "Chores" ] ] ]
+            :: List.map viewChore model.chores
+        )
 
 
-viewInput : String -> String -> String -> (String -> msg) -> Html msg
-viewInput t p v toMsg =
-    input [ type_ t, placeholder p, value v, onInput toMsg ] []
+viewChore : Chore -> Html msg
+viewChore chore =
+    case chore of
+        RepeatedWeekly { name, day } ->
+            article []
+                [ header []
+                    [ h2 [] [ text name ]
+                    , text ("Weekly - " ++ dayName day)
+                    ]
+                , div [] [ text "Needs Done" ]
+
+                -- TODO: add button to mark chore done
+                -- , button [] [ text "Mark as complete" ]
+                ]
 
 
-viewValidation : Model -> Html msg
-viewValidation model =
-    if model.password /= model.confirmPassword then
-        p [] [ text "Passwords do not match!" ]
+dayName : Time.Weekday -> String
+dayName day =
+    case day of
+        Time.Mon ->
+            "Monday"
 
-    else
-        Html.text ""
+        Time.Tue ->
+            "Tuesday"
+
+        Time.Wed ->
+            "Wednesday"
+
+        Time.Thu ->
+            "Thursday"
+
+        Time.Fri ->
+            "Friday"
+
+        Time.Sat ->
+            "Saturday"
+
+        Time.Sun ->
+            "Sunday"
+
+
+
+-- SUBSCRIPTIONS
+
+
+subscriptions : Model -> Sub Msg
+subscriptions _ =
+    onNewHistory NewHistory

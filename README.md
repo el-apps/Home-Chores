@@ -3,7 +3,9 @@
 
 Home-Chores is a lightweight web application for managing household tasks. Designed for families, it prioritizes offline functionality, data privacy, and seamless synchronization across devices without relying on third-party services.
 
-![Elm](https://img.shields.io/badge/Elm-0.19.1-1293D8) ![Go](https://img.shields.io/badge/Go-1.24-00ADD8)
+![Elm](https://img.shields.io/badge/Elm-0.19.1-1293D8) ![simple-sync](https://img.shields.io/badge/simple--sync-Alpha-orange)
+
+**NOTE** - This project is in the alpha stage. Many of the things documented here and elsewhere in this repo do not actually exist yet.
 
 ## Features
 
@@ -21,8 +23,7 @@ Home-Chores is a lightweight web application for managing household tasks. Desig
 ## Architecture
 
 - **Frontend**: [Elm](https://elm-lang.org/) (Reliable UI with no runtime errors)
-- **Backend**: [Go](https://go.dev/) (Single binary, lightweight server)
-- **Database**: [SQLite](https://www.sqlite.org/) (File-based, zero config)
+- **Backend**: [simple-sync](https://github.com/kwila-cloud/simple-sync) (Go-based sync server)
 - **Deployment**: [Docker](https://www.docker.com/) (Single container setup)
 
 ## Quick Start
@@ -32,14 +33,20 @@ Home-Chores is a lightweight web application for managing household tasks. Desig
    git clone https://github.com/el-apps/Home-Chores.git
    cd Home-Chores
    ```
-2. **Start the application**:
+1.  **Create a `.env` file** in the root directory with the following content:
+   ```
+   JWT_SECRET=your_generated_jwt_secret
+   ```
+   Replace `your_generated_jwt_secret` with a securely generated random string. You can generate one using `openssl rand -base64 32`.
+1. **Start the applications**:
    ```bash
    docker-compose up -d
    ```
-3. **Access the app**:
+1. **Access the app**:
    - Frontend: http://localhost:8000
-   - Backend API: http://localhost:8080
-4. **Your data persists** in `./data/chores.db` - even after container restarts!
+   - simple-sync API: http://localhost:8080
+
+1. **Your data persists** in the `data` volume - even after container restarts! (*managed by simple-sync*)
 
 ## Development Setup
 
@@ -49,119 +56,8 @@ cd frontend
 elm reactor  # Development server at http://localhost:8000
 elm make src/Main.elm --output=main.js  # Build for production
 ```
-
-### Backend (Go)
-```bash
-cd backend
-go run main.go  # Development server at http://localhost:8080
-go build -o home-chores-server  # Build binary
-```
-
-### Environment Variables
-| Variable              | Description                     | Default          |
-|-----------------------|---------------------------------|------------------|
-| `PORT`                | Backend server port             | `8080`           |
-| `DB_PATH`             | SQLite database file path       | `./data/chores.db` |
-| `SYNC_TOKEN`          | Authentication token (optional) | (none)          |
-
-## API Reference
-
-### Core Endpoints
-| Method | Endpoint          | Description                     |
-|--------|-------------------|---------------------------------|
-| `POST` | `/sync`           | Bidirectional data sync         |
-| `GET`  | `/initial-sync`   | Initial data load for new devices |
-
-### Sync Example
-```bash
-curl -X POST http://localhost:8080/sync \
-  -H "Content-Type: application/json" \
-  -H "X-Sync-Token: your-secret-token" \
-  -d '{
-    "last_sync": "2024-06-20T10:30:00Z",
-    "client_id": "device-123",
-    "chores": [
-      {
-        "id": "chor-abc123",
-        "title": "Take out trash",
-        "recurrence": "weekly",
-        "due_day": 2,  // Tuesday (0=Sunday)
-        "assigned_to": null
-      }
-    ],
-    "completions": []
-  }'
-```
-
-## Deployment
-
-### Production Docker Stack
-```yaml
-# docker-compose.yml
-version: '3.8'
-services:
-  backend:
-    build: ./backend
-    ports:
-      - "8080:8080"
-    volumes:
-      - ./data:/data
-    environment:
-      - SYNC_TOKEN=${SYNC_TOKEN}
-    restart: unless-stopped
-
-  frontend:
-    build: ./frontend
-    ports:
-      - "80:8000"
-    depends_on:
-      - backend
-    restart: unless-stopped
-```
-
-### Securing Your Instance
-1. **Generate a sync token**:
-   ```bash
-   openssl rand -base64 32
-   ```
-2. **Set environment variable**:
-   ```bash
-   echo "SYNC_TOKEN=your_generated_token" >> .env
-   ```
-3. **Start with production config**:
-   ```bash
-   docker-compose --env-file .env up -d
-   ```
-
-## How It Works
-
-### Offline-First Architecture
-1. **Data Flow**:
-   ```
-   Device A (Home) → Backend Sync → Device B (Phone)
-        ↑                  ↓                 ↑
-   Local Storage → Conflict Resolution → Local Storage
-   ```
-
-2. **Conflict Resolution**:
-   - Simple last-write-wins using timestamps
-   - Perfect for family usage (minimal conflicts expected)
-
-3. **Data Storage**:
-   ```
-   data/
-   └── chores.db  (SQLite database file)
-   ```
-
-### Synchronization Process
-1. Devices store data locally (IndexedDB/browser storage)
-2. Every 5 minutes + when network reconnects:
-   - Send local changes to backend
-   - Receive latest updates from backend
-   - Resolve conflicts automatically
-   - Update local storage
+TODO - add information on how to configure and integrate with [simple-sync](https://github.com/kwila-cloud/simple-sync).
 
 ## License
 
 This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
-
