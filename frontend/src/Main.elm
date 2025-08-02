@@ -65,6 +65,7 @@ view model =
         , viewInput "password" "Password" model.password Password
         , viewInput "password" "Re-enter Password" model.confirmPassword ConfirmPassword
         , viewValidation model
+        , p [] [ text "Chore 1 - make login work" ]
         ]
 
 
