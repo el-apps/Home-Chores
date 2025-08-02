@@ -69,30 +69,29 @@ See the [simple-sync](https://github.com/kwila-cloud/simple-sync) repository for
 ### Core Endpoints
 | Method | Endpoint          | Description                     |
 |--------|-------------------|---------------------------------|
-| `POST` | `/sync`           | Bidirectional data sync         |
-| `GET`  | `/initial-sync`   | Initial data load for new devices |
+| `POST` | `/events`         | Push client's diff history to the server |
+| `GET`  | `/events`         | Retrieve the authoritative event history |
 
 *These endpoints are provided by `simple-sync`. See the [simple-sync API documentation](https://github.com/kwila-cloud/simple-sync/blob/main/docs/api.md) for more details.*
 
-### Sync Example
+### Example Usage
+
+To sync your chores data, you'll interact with the `/events` endpoint. Here's an example of pushing local changes:
+
 ```bash
-curl -X POST http://localhost:8080/sync \
+curl -X POST http://localhost:8080/events \
   -H "Content-Type: application/json" \
-  -H "X-Sync-Token: your-secret-token" \
-  -d '{
-    "last_sync": "2024-06-20T10:30:00Z",
-    "client_id": "device-123",
-    "chores": [
-      {
-        "id": "chor-abc123",
-        "title": "Take out trash",
-        "recurrence": "weekly",
-        "due_day": 2,  // Tuesday (0=Sunday)
-        "assigned_to": null
-      }
-    ],
-    "completions": []
-  }'
+  -H "Authorization: Bearer <YOUR_JWT_TOKEN>" \
+  -d '[
+    {
+      "uuid": "a1b2c3d4-e5f6-7890-1234-567890abcdef",
+      "timestamp": 1678886400,
+      "userUuid": "user123",
+      "itemUuid": "chore-abc123",
+      "action": "create",
+      "payload": "{ \"title\": \"Take out trash\", \"recurrence\": \"weekly\", \"due_day\": 2 }"
+    }
+  ]'
 ```
 
 ## Deployment
@@ -142,26 +141,15 @@ services:
    ```
    Device A (Home) → simple-sync → Device B (Phone)
         ↑                  ↓                 ↑
-   Local Storage → Conflict Resolution → Local Storage
-   ```
-
-2. **Conflict Resolution**:
-   - Simple last-write-wins using timestamps
-   - Perfect for family usage (minimal conflicts expected)
-
-3. **Data Storage**:
-   ```
-   data/
-   └── chores.db  (SQLite database file - *managed by simple-sync*)
+   Local Storage         Sync Engine        Local Storage
    ```
 
 ### Synchronization Process
-1. Devices store data locally (IndexedDB/browser storage)
-2. Every 5 minutes + when network reconnects:
-   - Send local changes to backend
-   - Receive latest updates from backend
-   - Resolve conflicts automatically
-   - Update local storage
+1. Devices store data locally.
+2. Periodically (or when network reconnects), the client:
+   - Sends local changes to the `/events` endpoint.
+   - Receives the latest authoritative event history from the `/events` endpoint.
+   - Updates local storage with the merged data.
 
 *This synchronization is handled by `simple-sync`. See the [simple-sync documentation](https://github.com/kwila-cloud/simple-sync/blob/main/README.md) for more details.*
 
