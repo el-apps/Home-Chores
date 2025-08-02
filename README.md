@@ -60,10 +60,10 @@ To deploy Home-Chores, you'll need Docker and Docker Compose.
 1.  **Create a `.env` file** in the root directory with the following content:
 
 ```
-SYNC_TOKEN=your_generated_token
+JWT_SECRET=your_generated_jwt_secret
 ```
 
-   Replace `your_generated_token` with a securely generated random string. You can generate one using `openssl rand -base64 32`.
+   Replace `your_generated_jwt_secret` with a securely generated random string. You can generate one using `openssl rand -base64 32`.
 
 2.  **Run `docker-compose up -d`** in the root directory. This will start the frontend and backend services in detached mode.
 
