@@ -41,7 +41,7 @@ Home-Chores is a lightweight web application for managing household tasks. Desig
    - Frontend: http://localhost:8000
    - simple-sync API: http://localhost:8080
 
-1. **Your data persists** in `./data/chores.db` - even after container restarts! (*managed by simple-sync*)
+1. **Your data persists** in the `data` volume - even after container restarts! (*managed by simple-sync*)
 
 ## Development Setup
 
@@ -52,6 +52,20 @@ elm reactor  # Development server at http://localhost:8000
 elm make src/Main.elm --output=main.js  # Build for production
 ```
 TODO - add information on how to configure and integrate with [simple-sync](https://github.com/kwila-cloud/simple-sync).
+
+## Deployment
+
+To deploy Home-Chores, you'll need Docker and Docker Compose.
+
+1.  **Create a `.env` file** in the root directory with the following content:
+
+```
+SYNC_TOKEN=your_generated_token
+```
+
+   Replace `your_generated_token` with a securely generated random string. You can generate one using `openssl rand -base64 32`.
+
+2.  **Run `docker-compose up -d`** in the root directory. This will start the frontend and backend services in detached mode.
 
 ## License
 

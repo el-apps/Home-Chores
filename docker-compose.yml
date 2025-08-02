@@ -1,0 +1,24 @@
+version: "3.8"
+
+services:
+  frontend:
+    build:
+      context: ./frontend
+    ports:
+      - "8000:8000"
+    depends_on:
+      - backend
+    restart: unless-stopped
+
+  backend:
+    image: ghcr.io/kwila-cloud/simple-sync:latest
+    ports:
+      - "8080:8080"
+    volumes:
+      - data:/data
+    environment:
+      - SYNC_TOKEN=${SYNC_TOKEN}
+    restart: unless-stopped
+
+volumes:
+  data:
