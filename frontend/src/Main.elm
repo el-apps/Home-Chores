@@ -101,6 +101,7 @@ dayName day =
             "Tuesday"
 
         Time.Wed ->
+        // AI!: fill is remaining branches for dayName
             Debug.todo "branch 'Wed' not implemented"
 
         Time.Thu ->
