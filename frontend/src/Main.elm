@@ -70,7 +70,7 @@ update msg model =
 view : Model -> Html Msg
 view model =
     node "main"
-        []
+        [ class "container" ]
         [ div []
             (h1 [] [ text "Chores" ]
                 :: List.map viewChore model.chores
@@ -87,9 +87,10 @@ viewChore chore =
                     [ h2 [] [ text name ]
                     , text ("Weekly - " ++ dayName day)
                     ]
-                , text "Needs Done"
+                , div [] [ text "Needs Done" ]
 
                 -- TODO: add button to mark chore done
+                -- , button [] [ text "Mark as complete" ]
                 ]
 
 
