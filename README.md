@@ -33,6 +33,11 @@ Home-Chores is a lightweight web application for managing household tasks. Desig
    git clone https://github.com/el-apps/Home-Chores.git
    cd Home-Chores
    ```
+1.  **Create a `.env` file** in the root directory with the following content:
+   ```
+   JWT_SECRET=your_generated_jwt_secret
+   ```
+   Replace `your_generated_jwt_secret` with a securely generated random string. You can generate one using `openssl rand -base64 32`.
 1. **Start the applications**:
    ```bash
    docker-compose up -d
@@ -52,20 +57,6 @@ elm reactor  # Development server at http://localhost:8000
 elm make src/Main.elm --output=main.js  # Build for production
 ```
 TODO - add information on how to configure and integrate with [simple-sync](https://github.com/kwila-cloud/simple-sync).
-
-## Deployment
-
-To deploy Home-Chores, you'll need Docker and Docker Compose.
-
-1.  **Create a `.env` file** in the root directory with the following content:
-
-```
-JWT_SECRET=your_generated_jwt_secret
-```
-
-   Replace `your_generated_jwt_secret` with a securely generated random string. You can generate one using `openssl rand -base64 32`.
-
-2.  **Run `docker-compose up -d`** in the root directory. This will start the frontend and backend services in detached mode.
 
 ## License
 
