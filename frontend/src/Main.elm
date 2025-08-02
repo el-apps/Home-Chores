@@ -1,15 +1,17 @@
 module Main exposing (..)
 
 import Browser
-import Html exposing (Html, button, div, h1, input, p, text)
+import Html exposing (Html, div, h1, h2, input, node, p, text)
 import Html.Attributes exposing (..)
-import Html.Events exposing (onClick, onInput)
+import Html.Events exposing (onInput)
+import Time
 
 
 
 -- MAIN
 
 
+main : Program () Model Msg
 main =
     Browser.sandbox { init = init, update = update, view = view }
 
@@ -18,16 +20,36 @@ main =
 -- MODEL
 
 
+type Chore
+    = RepeatedWeekly
+        { uuid : String
+        , name : String
+        , day : Time.Weekday
+        }
+
+
+type alias ChoreCompletion =
+    { choreUuid : String
+    , timestamp : Time.Posix
+    }
+
+
 type alias Model =
     { name : String
     , password : String
     , confirmPassword : String
+    , chores : List Chore
     }
 
 
 init : Model
 init =
-    Model "" "" ""
+    Model ""
+        ""
+        ""
+        [ RepeatedWeekly { uuid = "c892a6cb-cfbc-4d05-8888-28b54f0ffe90", name = "Implement add chore", day = Time.Mon }
+        , RepeatedWeekly { uuid = "228a6965-28e2-4026-b6a9-6c0cc4a57026", name = "Implement complete chore", day = Time.Tue }
+        ]
 
 
 
@@ -59,13 +81,12 @@ update msg model =
 
 view : Model -> Html Msg
 view model =
-    div []
-        [ h1 [] [ text "Login" ]
-        , viewInput "text" "Name" model.name Name
-        , viewInput "password" "Password" model.password Password
-        , viewInput "password" "Re-enter Password" model.confirmPassword ConfirmPassword
-        , viewValidation model
-        , p [] [ text "Chore 1 - make login work" ]
+    node "main"
+        []
+        [ div []
+            (h2 [] [ text "Chores" ]
+                :: List.map viewChore model.chores
+            )
         ]
 
 
@@ -81,3 +102,10 @@ viewValidation model =
 
     else
         Html.text ""
+
+
+viewChore : Chore -> Html msg
+viewChore chore =
+    case chore of
+        RepeatedWeekly { name } ->
+            p [] [ text ("Chore: " ++ name) ]
