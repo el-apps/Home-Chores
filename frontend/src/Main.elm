@@ -72,7 +72,7 @@ view model =
     node "main"
         []
         [ div []
-            (h2 [] [ text "Chores" ]
+            (h1 [] [ text "Chores" ]
                 :: List.map viewChore model.chores
             )
         ]
@@ -84,10 +84,12 @@ viewChore chore =
         RepeatedWeekly { name, day } ->
             article []
                 [ header []
-                    [ text name ]
-                , text <|
-                    dayName day
-                , footer [] [ text "weekly" ]
+                    [ h2 [] [ text name ]
+                    , text ("Weekly - " ++ dayName day)
+                    ]
+                , text "Needs Done"
+
+                -- TODO: add button to mark chore done
                 ]
 
 
