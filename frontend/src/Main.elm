@@ -1,9 +1,8 @@
 module Main exposing (..)
 
 import Browser
-import Html exposing (Html, div, h1, h2, input, node, p, text)
+import Html exposing (..)
 import Html.Attributes exposing (..)
-import Html.Events exposing (onInput)
 import Time
 
 
@@ -35,21 +34,18 @@ type alias ChoreCompletion =
 
 
 type alias Model =
-    { name : String
-    , password : String
-    , confirmPassword : String
-    , chores : List Chore
+    { chores : List Chore
+    , completedChores : List ChoreCompletion
     }
 
 
 init : Model
 init =
-    Model ""
-        ""
-        ""
+    Model
         [ RepeatedWeekly { uuid = "c892a6cb-cfbc-4d05-8888-28b54f0ffe90", name = "Implement add chore", day = Time.Mon }
         , RepeatedWeekly { uuid = "228a6965-28e2-4026-b6a9-6c0cc4a57026", name = "Implement complete chore", day = Time.Tue }
         ]
+        []
 
 
 
@@ -57,22 +53,14 @@ init =
 
 
 type Msg
-    = Name String
-    | Password String
-    | ConfirmPassword String
+    = AddChore Chore
 
 
 update : Msg -> Model -> Model
 update msg model =
     case msg of
-        Name newName ->
-            { model | name = newName }
-
-        Password newPassword ->
-            { model | password = newPassword }
-
-        ConfirmPassword newConfirmPassword ->
-            { model | confirmPassword = newConfirmPassword }
+        AddChore _ ->
+            model
 
 
 
@@ -90,22 +78,39 @@ view model =
         ]
 
 
-viewInput : String -> String -> String -> (String -> msg) -> Html msg
-viewInput t p v toMsg =
-    input [ type_ t, placeholder p, value v, onInput toMsg ] []
-
-
-viewValidation : Model -> Html msg
-viewValidation model =
-    if model.password /= model.confirmPassword then
-        p [] [ text "Passwords do not match!" ]
-
-    else
-        Html.text ""
-
-
 viewChore : Chore -> Html msg
 viewChore chore =
     case chore of
-        RepeatedWeekly { name } ->
-            p [] [ text ("Chore: " ++ name) ]
+        RepeatedWeekly { name, day } ->
+            article []
+                [ header []
+                    [ text name ]
+                , text <|
+                    dayName day
+                , footer [] [ text "weekly" ]
+                ]
+
+
+dayName : Time.Weekday -> String
+dayName day =
+    case day of
+        Time.Mon ->
+            "Monday"
+
+        Time.Tue ->
+            "Tuesday"
+
+        Time.Wed ->
+            Debug.todo "branch 'Wed' not implemented"
+
+        Time.Thu ->
+            Debug.todo "branch 'Thu' not implemented"
+
+        Time.Fri ->
+            Debug.todo "branch 'Fri' not implemented"
+
+        Time.Sat ->
+            Debug.todo "branch 'Sat' not implemented"
+
+        Time.Sun ->
+            Debug.todo "branch 'Sun' not implemented"
