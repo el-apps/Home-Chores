@@ -23,24 +23,12 @@
         node: document.getElementById('root'),
       });
 
-      app.ports.storeCache.subscribe(function(val) {
+      app.ports.pushData.subscribe(function(val) {
+        // TODO: push data to sync server
 
-        if (val === null) {
-          localStorage.removeItem(storageKey);
-        } else {
-          localStorage.setItem(storageKey, JSON.stringify(val));
-        }
-
-        // Report that the new session was stored successfully.
-        setTimeout(function() { app.ports.onStoreChange.send(val); }, 0);
+        // TODO: send new history to app
       });
-
-      // Whenever localStorage changes in another tab, report it if necessary.
-      window.addEventListener("storage", function(event) {
-        if (event.storageArea === localStorage && event.key === storageKey) {
-          app.ports.onStoreChange.send(event.newValue);
-        }
-      }, false);
+      // TODO: load initial history and send to app
     </script>
   </body>
 </html>

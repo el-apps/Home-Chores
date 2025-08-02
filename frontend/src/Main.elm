@@ -1,8 +1,9 @@
-module Main exposing (..)
+port module Main exposing (..)
 
 import Browser
 import Html exposing (..)
 import Html.Attributes exposing (..)
+import Json.Decode exposing (Value)
 import Time
 
 
@@ -12,7 +13,17 @@ import Time
 
 main : Program () Model Msg
 main =
-    Browser.sandbox { init = init, update = update, view = view }
+    Browser.element { init = init, view = view, update = update, subscriptions = subscriptions }
+
+
+
+-- PORTS
+
+
+port pushData : Value -> Cmd msg
+
+
+port onNewHistory : (Value -> msg) -> Sub msg
 
 
 
@@ -39,13 +50,15 @@ type alias Model =
     }
 
 
-init : Model
-init =
-    Model
+init : () -> ( Model, Cmd Msg )
+init _ =
+    ( Model
         [ RepeatedWeekly { uuid = "c892a6cb-cfbc-4d05-8888-28b54f0ffe90", name = "Take out the trash", day = Time.Wed }
         , RepeatedWeekly { uuid = "228a6965-28e2-4026-b6a9-6c0cc4a57026", name = "Mow the yard", day = Time.Tue }
         ]
         []
+    , Cmd.none
+    )
 
 
 
@@ -53,14 +66,20 @@ init =
 
 
 type Msg
-    = AddChore Chore
+    = NewHistory Value
+    | AddChore Chore
 
 
-update : Msg -> Model -> Model
+update : Msg -> Model -> ( Model, Cmd Msg )
 update msg model =
     case msg of
+        NewHistory _ ->
+            -- TODO: incorporate new data from outside
+            ( model, Cmd.none )
+
         AddChore _ ->
-            model
+            -- TODO: add chore
+            ( model, Cmd.none )
 
 
 
@@ -115,3 +134,12 @@ dayName day =
 
         Time.Sun ->
             "Sunday"
+
+
+
+-- SUBSCRIPTIONS
+
+
+subscriptions : Model -> Sub Msg
+subscriptions _ =
+    onNewHistory NewHistory
