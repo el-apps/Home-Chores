@@ -1,0 +1,4 @@
+#:schema node_modules/wrangler/config-schema.json
+name = "home-chores-frontend"
+compatibility_date = "2024-09-25"
+assets = { directory = "./deploy" }
