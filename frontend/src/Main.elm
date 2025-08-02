@@ -101,17 +101,16 @@ dayName day =
             "Tuesday"
 
         Time.Wed ->
-        // AI!: fill is remaining branches for dayName
-            Debug.todo "branch 'Wed' not implemented"
+            "Wednesday"
 
         Time.Thu ->
-            Debug.todo "branch 'Thu' not implemented"
+            "Thursday"
 
         Time.Fri ->
-            Debug.todo "branch 'Fri' not implemented"
+            "Friday"
 
         Time.Sat ->
-            Debug.todo "branch 'Sat' not implemented"
+            "Saturday"
 
         Time.Sun ->
-            Debug.todo "branch 'Sun' not implemented"
+            "Sunday"
