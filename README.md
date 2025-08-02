@@ -3,7 +3,7 @@
 
 Home-Chores is a lightweight web application for managing household tasks. Designed for families, it prioritizes offline functionality, data privacy, and seamless synchronization across devices without relying on third-party services.
 
-![Elm](https://img.shields.io/badge/Elm-0.19.1-1293D8) ![Go](https://img.shields.io/badge/Go-1.24-00ADD8)
+![Elm](https://img.shields.io/badge/Elm-0.19.1-1293D8) ![Go](https://img.shields.io/badge/Go-1.24-00ADD8) ![simple-sync](https://img.shields.io/badge/simple--sync-Alpha-orange)
 
 ## Features
 
@@ -21,8 +21,8 @@ Home-Chores is a lightweight web application for managing household tasks. Desig
 ## Architecture
 
 - **Frontend**: [Elm](https://elm-lang.org/) (Reliable UI with no runtime errors)
-- **Backend**: [Go](https://go.dev/) (Single binary, lightweight server)
-- **Database**: [SQLite](https://www.sqlite.org/) (File-based, zero config)
+- **Backend**: [simple-sync](https://github.com/kwila-cloud/simple-sync) (Go-based sync server)
+- **Database**: [SQLite](https://www.sqlite.org/) (File-based, zero config - *managed by simple-sync*)
 - **Deployment**: [Docker](https://www.docker.com/) (Single container setup)
 
 ## Quick Start
@@ -32,14 +32,18 @@ Home-Chores is a lightweight web application for managing household tasks. Desig
    git clone https://github.com/el-apps/Home-Chores.git
    cd Home-Chores
    ```
-2. **Start the application**:
+2.  **Clone the simple-sync repository**:
+    ```bash
+    git clone https://github.com/kwila-cloud/simple-sync.git
+    ```
+3. **Start the applications**:
    ```bash
    docker-compose up -d
    ```
-3. **Access the app**:
+4. **Access the app**:
    - Frontend: http://localhost:8000
-   - Backend API: http://localhost:8080
-4. **Your data persists** in `./data/chores.db` - even after container restarts!
+   - simple-sync API: http://localhost:8080
+5. **Your data persists** in `./data/chores.db` - even after container restarts! (*managed by simple-sync*)
 
 ## Development Setup
 
@@ -50,12 +54,8 @@ elm reactor  # Development server at http://localhost:8000
 elm make src/Main.elm --output=main.js  # Build for production
 ```
 
-### Backend (Go)
-```bash
-cd backend
-go run main.go  # Development server at http://localhost:8080
-go build -o home-chores-server  # Build binary
-```
+### Backend (simple-sync)
+See the [simple-sync](https://github.com/kwila-cloud/simple-sync) repository for instructions on how to run the backend.
 
 ### Environment Variables
 | Variable              | Description                     | Default          |
@@ -71,6 +71,8 @@ go build -o home-chores-server  # Build binary
 |--------|-------------------|---------------------------------|
 | `POST` | `/sync`           | Bidirectional data sync         |
 | `GET`  | `/initial-sync`   | Initial data load for new devices |
+
+*These endpoints are provided by `simple-sync`. See the [simple-sync API documentation](https://github.com/kwila-cloud/simple-sync/blob/main/docs/api.md) for more details.*
 
 ### Sync Example
 ```bash
@@ -101,7 +103,7 @@ curl -X POST http://localhost:8080/sync \
 version: '3.8'
 services:
   backend:
-    build: ./backend
+    image: ghcr.io/kwila-cloud/simple-sync:latest
     ports:
       - "8080:8080"
     volumes:
@@ -138,7 +140,7 @@ services:
 ### Offline-First Architecture
 1. **Data Flow**:
    ```
-   Device A (Home) → Backend Sync → Device B (Phone)
+   Device A (Home) → simple-sync → Device B (Phone)
         ↑                  ↓                 ↑
    Local Storage → Conflict Resolution → Local Storage
    ```
@@ -150,7 +152,7 @@ services:
 3. **Data Storage**:
    ```
    data/
-   └── chores.db  (SQLite database file)
+   └── chores.db  (SQLite database file - *managed by simple-sync*)
    ```
 
 ### Synchronization Process
@@ -161,7 +163,8 @@ services:
    - Resolve conflicts automatically
    - Update local storage
 
+*This synchronization is handled by `simple-sync`. See the [simple-sync documentation](https://github.com/kwila-cloud/simple-sync/blob/main/README.md) for more details.*
+
 ## License
 
 This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
-
