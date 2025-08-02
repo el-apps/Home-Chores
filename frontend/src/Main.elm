@@ -71,11 +71,9 @@ view : Model -> Html Msg
 view model =
     node "main"
         [ class "container" ]
-        [ div []
-            (h1 [] [ text "Chores" ]
-                :: List.map viewChore model.chores
-            )
-        ]
+        (nav [] [ ul [] [ h1 [] [ text "Chores" ] ] ]
+            :: List.map viewChore model.chores
+        )
 
 
 viewChore : Chore -> Html msg
