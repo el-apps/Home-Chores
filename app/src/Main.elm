@@ -62,12 +62,17 @@ type alias ChoreCompletion =
 type alias Model =
     { chores : List Chore
     , choreCompletions : List ChoreCompletion
+    , currentTime : Time.Posix
     }
 
 
-init : () -> ( Model, Cmd Msg )
-init _ =
-    ( Model [] []
+init : Int -> ( Model, Cmd Msg )
+init nowMillis =
+    let
+        nowPosix =
+            Time.millisToPosix nowMillis
+    in
+    ( Model [] [] nowPosix
     , Cmd.none
     )
 
@@ -152,8 +157,8 @@ weekdayFromString s =
             Nothing
 
 
-buildModelFromEvents : List Event -> Model
-buildModelFromEvents events =
+buildModelFromEvents : Time.Posix -> List Event -> Model
+buildModelFromEvents currentTime events =
     let
         sorted =
             List.sortBy (\e -> Time.posixToMillis e.timestamp) events
@@ -224,6 +229,7 @@ buildModelFromEvents events =
     in
     { chores = choresDict |> Dict.toList |> List.filterMap toChore
     , choreCompletions = List.reverse completions
+    , currentTime = currentTime
     }
 
 
@@ -242,7 +248,7 @@ update msg model =
         NewHistory value ->
             case Decode.decodeValue eventsDecoder value of
                 Ok events ->
-                    ( buildModelFromEvents events, Cmd.none )
+                    ( buildModelFromEvents model.currentTime events, Cmd.none )
 
                 Err _ ->
                     ( model, Cmd.none )
