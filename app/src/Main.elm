@@ -293,11 +293,11 @@ viewChore currentTime completions chore =
     div []
         [ label []
             [ statusCheckbox
-            , div []
-                ( [ text title ]
+            , div [ style [ ( "display", "flex" ), ( "flex-direction", "column" ) ] ]
+                ( [ div [] [ text title ] ]
                     ++ case maybeSubtitle of
                         Just s ->
-                            [ span [] [ text (" " ++ s) ] ]
+                            [ div [] [ text s ] ]
 
                         Nothing ->
                             []
