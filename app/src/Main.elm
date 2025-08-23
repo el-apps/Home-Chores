@@ -29,7 +29,7 @@ port newEvent : Value -> Cmd msg
 port onNewHistory : (Value -> msg) -> Sub msg
 
 
-port currentTime : (Int -> msg) -> Sub msg
+port receiveCurrentTime : (Int -> msg) -> Sub msg
 
 
 
@@ -458,5 +458,5 @@ subscriptions : Model -> Sub Msg
 subscriptions _ =
     Sub.batch
         [ onNewHistory NewHistory
-        , currentTime TickTime
+        , receiveCurrentTime TickTime
         ]
