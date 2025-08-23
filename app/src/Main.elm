@@ -1,10 +1,10 @@
 port module Main exposing (..)
 
 import Browser
+import Dict exposing (Dict)
 import Html exposing (..)
 import Html.Attributes exposing (..)
-import Json.Decode as Decode exposing (Decoder, Value)
-import Dict exposing (Dict)
+import Json.Decode as Decode exposing (Value)
 import Time
 
 
@@ -29,6 +29,16 @@ port onNewHistory : (Value -> msg) -> Sub msg
 
 
 -- MODEL
+
+
+type alias Event =
+    { uuid : String
+    , timestamp : Time.Posix
+    , userUuid : String
+    , itemUuid : String
+    , action : String
+    , payload : String
+    }
 
 
 type Chore
@@ -66,74 +76,9 @@ init _ =
 -- DECODERS
 
 
-weekdayDecoder : Decode.Decoder Time.Weekday
-weekdayDecoder =
-    Decode.string
-        |> Decode.andThen
-            (\s ->
-                case s of
-                    "Mon" ->
-                        Decode.succeed Time.Mon
-
-                    "Tue" ->
-                        Decode.succeed Time.Tue
-
-                    "Wed" ->
-                        Decode.succeed Time.Wed
-
-                    "Thu" ->
-                        Decode.succeed Time.Thu
-
-                    "Fri" ->
-                        Decode.succeed Time.Fri
-
-                    "Sat" ->
-                        Decode.succeed Time.Sat
-
-                    "Sun" ->
-                        Decode.succeed Time.Sun
-
-                    _ ->
-                        Decode.fail ("Invalid weekday: " ++ s)
-            )
-
-
-choreDecoder : Decode.Decoder Chore
-choreDecoder =
-    Decode.field "type" Decode.string
-        |> Decode.andThen
-            (\typ ->
-                case typ of
-                    "repeated_weekly" ->
-                        Decode.map3
-                            (\uuid name day ->
-                                RepeatedWeekly { uuid = uuid, name = name, day = day }
-                            )
-                            (Decode.field "uuid" Decode.string)
-                            (Decode.field "name" Decode.string)
-                            (Decode.field "day" weekdayDecoder)
-
-                    "one_time" ->
-                        Decode.map2
-                            (\uuid name ->
-                                OneTime { uuid = uuid, name = name }
-                            )
-                            (Decode.field "uuid" Decode.string)
-                            (Decode.field "name" Decode.string)
-
-                    _ ->
-                        Decode.fail ("Unknown chore type: " ++ typ)
-            )
-
-
-type alias Event =
-    { uuid : String
-    , timestamp : Time.Posix
-    , userUuid : String
-    , itemUuid : String
-    , action : String
-    , payload : String
-    }
+eventsDecoder : Decode.Decoder (List Event)
+eventsDecoder =
+    Decode.list eventDecoder
 
 
 eventDecoder : Decode.Decoder Event
@@ -154,11 +99,6 @@ eventDecoder =
         (Decode.field "itemUuid" Decode.string)
         (Decode.field "action" Decode.string)
         (Decode.field "payload" Decode.string)
-
-
-eventsDecoder : Decode.Decoder (List Event)
-eventsDecoder =
-    Decode.list eventDecoder
 
 
 updatePayloadDecoder : Decode.Decoder ( String, String )
@@ -212,13 +152,13 @@ buildModelFromEvents events =
         sorted =
             List.sortBy (\e -> Time.posixToMillis e.timestamp) events
 
-        step event ( items, completionsAcc ) =
+        step event ( items, completionsAccumulator ) =
             case event.action of
                 "addChore" ->
                     ( Dict.update event.itemUuid
                         (\maybe -> Just (Maybe.withDefault Dict.empty maybe))
                         items
-                    , completionsAcc
+                    , completionsAccumulator
                     )
 
                 "updateChore" ->
@@ -233,26 +173,26 @@ buildModelFromEvents events =
                                     Just (Dict.insert field value attrs)
                                 )
                                 items
-                            , completionsAcc
+                            , completionsAccumulator
                             )
 
                         Err _ ->
-                            ( items, completionsAcc )
+                            ( items, completionsAccumulator )
 
                 "completeChore" ->
                     case Decode.decodeString completePayloadDecoder event.payload of
                         Ok ts ->
                             ( items
-                            , { choreUuid = event.itemUuid, timestamp = ts } :: completionsAcc
+                            , { choreUuid = event.itemUuid, timestamp = ts } :: completionsAccumulator
                             )
 
                         Err _ ->
-                            ( items, completionsAcc )
+                            ( items, completionsAccumulator )
 
                 _ ->
-                    ( items, completionsAcc )
+                    ( items, completionsAccumulator )
 
-        ( itemsDict, completions ) =
+        ( choresDict, completions ) =
             List.foldl step ( Dict.empty, [] ) sorted
 
         toChore ( uuid, attrs ) =
@@ -264,7 +204,7 @@ buildModelFromEvents events =
                                 Just day ->
                                     Just (RepeatedWeekly { uuid = uuid, name = name, day = day })
 
-                                Nothing ->
+                                _ ->
                                     Nothing
 
                         _ ->
@@ -281,9 +221,10 @@ buildModelFromEvents events =
                 _ ->
                     Nothing
     in
-    { chores = itemsDict |> Dict.toList |> List.filterMap toChore
+    { chores = choresDict |> Dict.toList |> List.filterMap toChore
     , completedChores = List.reverse completions
     }
+
 
 
 -- UPDATE
