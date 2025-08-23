@@ -1,0 +1,13 @@
+{
+  "name": "home-chores-app",
+  "version": "0.0.0",
+  "private": true,
+  "devDependencies": {
+    "elm-live": "4.0.2",
+    "elm": "0.19.1-6"
+  },
+  "scripts": {
+    "dev": "elm-live src/Main.elm --dir deploy --open -- --output deploy/elm.js",
+    "build": "elm make src/Main.elm --output deploy/elm.js --optimize"
+  }
+}

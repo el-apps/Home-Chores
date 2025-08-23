@@ -1,0 +1,47 @@
+nav {
+  margin-bottom: var(--pico-spacing);
+
+  ul {
+    width: 100%;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+
+    h1 {
+      margin: 0;
+    }
+  }
+}
+
+.chores {
+  display: flex;
+  flex-direction: column;
+  gap: calc(var(--pico-spacing) * 0.5);
+
+  .chore {
+    background: var(--pico-card-background-color);
+    padding: var(--pico-spacing);
+    border-radius: calc(var(--pico-border-radius) * 4);
+
+    label {
+      display: flex;
+      flex-direction: row;
+      gap: var(--pico-spacing);
+      align-items: center;
+      margin-bottom: 0;
+
+      .content {
+        display: flex;
+        flex-direction: column;
+
+        .title {
+          font-size: 1.2rem;
+        }
+
+        .subtitle {
+          font-size: 0.8rem;
+        }
+      }
+    }
+  }
+}

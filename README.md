@@ -52,11 +52,10 @@ Home-Chores is a lightweight web application for managing household chores. Desi
 
 ### Frontend (Elm)
 ```bash
-cd frontend
-elm reactor  # Development server at http://localhost:8000
-elm make src/Main.elm --output=main.js  # Build for production
+cd app
+npm i
+npm run dev
 ```
-TODO - add information on how to configure and integrate with [simple-sync](https://github.com/kwila-cloud/simple-sync).
 
 ## License
 
