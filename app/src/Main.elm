@@ -3,7 +3,7 @@ port module Main exposing (..)
 import Browser
 import Html exposing (..)
 import Html.Attributes exposing (..)
-import Json.Decode exposing (Value)
+import Json.Decode as Decode exposing (Decoder, Value)
 import Time
 
 
@@ -56,15 +56,93 @@ type alias Model =
 
 init : () -> ( Model, Cmd Msg )
 init _ =
-    ( Model
-        [ RepeatedWeekly { uuid = "c892a6cb-cfbc-4d05-8888-28b54f0ffe90", name = "Take out the trash", day = Time.Wed }
-        , RepeatedWeekly { uuid = "228a6965-28e2-4026-b6a9-6c0cc4a57026", name = "Mow the yard", day = Time.Tue }
-        , OneTime { uuid = "37d8e82b-bf25-4da6-85a7-5fb6c76b5002", name = "Allow the user to add one-time chores" }
-        ]
-        []
+    ( Model [] []
     , Cmd.none
     )
 
+
+
+-- DECODERS
+
+
+weekdayDecoder : Decode.Decoder Time.Weekday
+weekdayDecoder =
+    Decode.string
+        |> Decode.andThen
+            (\s ->
+                case s of
+                    "Mon" ->
+                        Decode.succeed Time.Mon
+
+                    "Tue" ->
+                        Decode.succeed Time.Tue
+
+                    "Wed" ->
+                        Decode.succeed Time.Wed
+
+                    "Thu" ->
+                        Decode.succeed Time.Thu
+
+                    "Fri" ->
+                        Decode.succeed Time.Fri
+
+                    "Sat" ->
+                        Decode.succeed Time.Sat
+
+                    "Sun" ->
+                        Decode.succeed Time.Sun
+
+                    _ ->
+                        Decode.fail ("Invalid weekday: " ++ s)
+            )
+
+
+choreDecoder : Decode.Decoder Chore
+choreDecoder =
+    Decode.field "type" Decode.string
+        |> Decode.andThen
+            (\typ ->
+                case typ of
+                    "repeated_weekly" ->
+                        Decode.map3
+                            (\uuid name day ->
+                                RepeatedWeekly { uuid = uuid, name = name, day = day }
+                            )
+                            (Decode.field "uuid" Decode.string)
+                            (Decode.field "name" Decode.string)
+                            (Decode.field "day" weekdayDecoder)
+
+                    "one_time" ->
+                        Decode.map2
+                            (\uuid name ->
+                                OneTime { uuid = uuid, name = name }
+                            )
+                            (Decode.field "uuid" Decode.string)
+                            (Decode.field "name" Decode.string)
+
+                    _ ->
+                        Decode.fail ("Unknown chore type: " ++ typ)
+            )
+
+
+choreCompletionDecoder : Decode.Decoder ChoreCompletion
+choreCompletionDecoder =
+    Decode.map2
+        (\choreUuid timestampMillis ->
+            { choreUuid = choreUuid, timestamp = Time.millisToPosix timestampMillis }
+        )
+        (Decode.field "choreUuid" Decode.string)
+        (Decode.field "timestamp" Decode.int)
+
+
+modelDecoder : Decode.Decoder Model
+modelDecoder =
+    Decode.map2
+        (\chores completedChores ->
+            { chores = chores, completedChores = completedChores }
+        )
+        (Decode.field "chores" (Decode.list choreDecoder))
+        (Decode.field "completedChores" (Decode.list choreCompletionDecoder))
 
 
 -- UPDATE
@@ -78,9 +156,13 @@ type Msg
 update : Msg -> Model -> ( Model, Cmd Msg )
 update msg model =
     case msg of
-        NewHistory _ ->
-            -- TODO: incorporate new data from outside
-            ( model, Cmd.none )
+        NewHistory value ->
+            case Decode.decodeValue modelDecoder value of
+                Ok newModel ->
+                    ( newModel, Cmd.none )
+
+                Err _ ->
+                    ( model, Cmd.none )
 
         AddChore _ ->
             -- TODO: add chore
