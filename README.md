@@ -53,7 +53,8 @@ Home-Chores is a lightweight web application for managing household chores. Desi
 ### Frontend (Elm)
 ```bash
 cd app
-./run.sh  # Development server with auto-reload at http://localhost:8000
+npm i
+npm run dev
 ```
 
 ## License
