@@ -52,7 +52,7 @@ Home-Chores is a lightweight web application for managing household chores. Desi
 
 ### Frontend (Elm)
 ```bash
-cd frontend
+cd app
 elm reactor  # Development server at http://localhost:8000
 elm make src/Main.elm --output=main.js  # Build for production
 ```
