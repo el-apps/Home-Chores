@@ -276,45 +276,42 @@ viewChore currentTime completions chore =
     let
         completed =
             isCompleted currentTime completions chore
+
+        -- normalize a chore into a common title and optional subtitle
+        ( title, maybeSubtitle ) =
+            case chore of
+                RepeatedWeekly { name, day } ->
+                    ( name, Just ("Weekly - " ++ dayName day) )
+
+                OneTime { name } ->
+                    ( name, Nothing )
+
+        statusText =
+            if completed then
+                "Done"
+            else
+                "Needs Done"
+
+        statusCheckbox =
+            input [ type_ "checkbox", checked completed, disabled True ] []
     in
-    case chore of
-        RepeatedWeekly { name, day } ->
-            article []
-                [ header []
-                    [ h2 [] [ text name ]
-                    , text ("Weekly - " ++ dayName day)
-                    ]
-                , div []
-                    [ text
-                        (if completed then
-                            "Done"
+    article []
+        [ header []
+            [ h2 [] [ text title ]
+            , case maybeSubtitle of
+                Just s ->
+                    text (" " ++ s)
 
-                         else
-                            "Needs Done"
-                        )
-                    ]
-
-                -- TODO: add button to mark chore done
-                -- , button [] [ text "Mark as complete" ]
+                Nothing ->
+                    text ""
+            ]
+        , div []
+            [ label []
+                [ statusCheckbox
+                , text (" " ++ statusText)
                 ]
-
-        OneTime { name } ->
-            article []
-                [ header []
-                    [ h2 [] [ text name ] ]
-                , div []
-                    [ text
-                        (if completed then
-                            "Done"
-
-                         else
-                            "Needs Done"
-                        )
-                    ]
-
-                -- TODO: add button to mark chore done
-                -- , button [] [ text "Mark as complete" ]
-                ]
+            ]
+        ]
 
 
 dayName : Time.Weekday -> String
