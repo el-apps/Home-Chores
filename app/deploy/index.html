@@ -17,18 +17,48 @@
     <div id="root"></div>
     <script>
       var storageKey = "store";
-      var flags = localStorage.getItem(storageKey);
+
+      // Some dummy initial data to bootstrap the app
+      var defaultData = {
+        chores: [
+          { type: "repeated_weekly", uuid: "c892a6cb-cfbc-4d05-8888-28b54f0ffe90", name: "Take out the trash", day: "Wed" },
+          { type: "repeated_weekly", uuid: "228a6965-28e2-4026-b6a9-6c0cc4a57026", name: "Mow the yard", day: "Tue" },
+          { type: "one_time", uuid: "37d8e82b-bf25-4da6-85a7-5fb6c76b5002", name: "Allow the user to add one-time chores" }
+        ],
+        completedChores: [
+          { choreUuid: "c892a6cb-cfbc-4d05-8888-28b54f0ffe90", timestamp: Date.now() - 2 * 24 * 60 * 60 * 1000 }
+        ]
+      };
+
+      // Load from localStorage if present, else use defaults
+      var persisted = localStorage.getItem(storageKey);
+      var historyObj;
+      try {
+        historyObj = persisted ? JSON.parse(persisted) : defaultData;
+      } catch (e) {
+        console.warn("Corrupt persisted data, falling back to defaults:", e);
+        historyObj = defaultData;
+      }
+
       var app = Elm.Main.init({
-        flags: flags,
         node: document.getElementById('root'),
       });
 
+      // Send initial history to app
+      app.ports.onNewHistory.send(historyObj);
+
+      // When Elm asks to push data, persist it and echo back as the latest history
       app.ports.pushData.subscribe(function(val) {
         // TODO: push data to sync server
+        try {
+          localStorage.setItem(storageKey, JSON.stringify(val));
+        } catch (e) {
+          console.warn("Failed to persist data to localStorage:", e);
+        }
 
-        // TODO: send new history to app
+        // Send new history to app
+        app.ports.onNewHistory.send(val);
       });
-      // TODO: load initial history and send to app
     </script>
   </body>
 </html>
