@@ -212,13 +212,13 @@ buildModelFromEvents events =
         sorted =
             List.sortBy (\e -> Time.posixToMillis e.timestamp) events
 
-        step event ( items, completions ) =
+        step event ( items, completionsAcc ) =
             case event.action of
                 "addChore" ->
                     ( Dict.update event.itemUuid
                         (\maybe -> Just (Maybe.withDefault Dict.empty maybe))
                         items
-                    , completions
+                    , completionsAcc
                     )
 
                 "updateChore" ->
@@ -233,24 +233,24 @@ buildModelFromEvents events =
                                     Just (Dict.insert field value attrs)
                                 )
                                 items
-                            , completions
+                            , completionsAcc
                             )
 
                         Err _ ->
-                            ( items, completions )
+                            ( items, completionsAcc )
 
                 "completeChore" ->
                     case Decode.decodeString completePayloadDecoder event.payload of
                         Ok ts ->
                             ( items
-                            , { choreUuid = event.itemUuid, timestamp = ts } :: completions
+                            , { choreUuid = event.itemUuid, timestamp = ts } :: completionsAcc
                             )
 
                         Err _ ->
-                            ( items, completions )
+                            ( items, completionsAcc )
 
                 _ ->
-                    ( items, completions )
+                    ( items, completionsAcc )
 
         ( itemsDict, completions ) =
             List.foldl step ( Dict.empty, [] ) sorted
