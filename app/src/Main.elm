@@ -269,12 +269,7 @@ viewChore : List ChoreCompletion -> Chore -> Html msg
 viewChore completions chore =
     let
         completed =
-            case chore of
-                RepeatedWeekly { uuid } ->
-                    isWeeklyCompleted completions uuid
-
-                OneTime { uuid } ->
-                    isOneTimeCompleted completions uuid
+            isCompleted completions chore
     in
     case chore of
         RepeatedWeekly { name, day } ->
@@ -283,7 +278,15 @@ viewChore completions chore =
                     [ h2 [] [ text name ]
                     , text ("Weekly - " ++ dayName day)
                     ]
-                , div [] [ text (if completed then "Done" else "Needs Done") ]
+                , div []
+                    [ text
+                        (if completed then
+                            "Done"
+
+                         else
+                            "Needs Done"
+                        )
+                    ]
 
                 -- TODO: add button to mark chore done
                 -- , button [] [ text "Mark as complete" ]
@@ -293,7 +296,15 @@ viewChore completions chore =
             article []
                 [ header []
                     [ h2 [] [ text name ] ]
-                , div [] [ text (if completed then "Done" else "Needs Done") ]
+                , div []
+                    [ text
+                        (if completed then
+                            "Done"
+
+                         else
+                            "Needs Done"
+                        )
+                    ]
 
                 -- TODO: add button to mark chore done
                 -- , button [] [ text "Mark as complete" ]
