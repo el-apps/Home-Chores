@@ -194,28 +194,31 @@ buildModelFromEvents events =
         toChore ( uuid, attrs ) =
             case Dict.get "type" attrs of
                 Just "repeated_weekly" ->
-                    case ( Dict.get "name" attrs, Dict.get "day" attrs ) of
-                        ( Just name, Just dayStr ) ->
-                            case weekdayFromString dayStr of
-                                Just day ->
-                                    Just (RepeatedWeekly { uuid = uuid, name = name, day = day })
+                    let
+                        name =
+                            Maybe.withDefault "New Chore" (Dict.get "name" attrs)
 
-                                _ ->
-                                    Nothing
+                        dayStr =
+                            Maybe.withDefault "Mon" (Dict.get "day" attrs)
 
-                        _ ->
-                            Nothing
+                        day =
+                            Maybe.withDefault Time.Mon (weekdayFromString dayStr)
+                    in
+                    Just ( RepeatedWeekly { uuid = uuid, name = name, day = day } )
 
                 Just "one_time" ->
-                    case Dict.get "name" attrs of
-                        Just name ->
-                            Just (OneTime { uuid = uuid, name = name })
-
-                        _ ->
-                            Nothing
+                    let
+                        name =
+                            Maybe.withDefault "New Chore" (Dict.get "name" attrs)
+                    in
+                    Just ( OneTime { uuid = uuid, name = name } )
 
                 _ ->
-                    Nothing
+                    let
+                        name =
+                            Maybe.withDefault "New Chore" (Dict.get "name" attrs)
+                    in
+                    Just ( OneTime { uuid = uuid, name = name } )
     in
     { chores = choresDict |> Dict.toList |> List.filterMap toChore
     , completedChores = List.reverse completions
