@@ -87,10 +87,47 @@
       // Send initial event history to app
       app.ports.onNewHistory.send(historyArr);
 
-      // When Elm sends a single new event, append it to history, persist, and echo back the latest history
+      // When Elm sends a single new event, let JS generate uuid/timestamp, persist, and echo back the latest history
       app.ports.newEvent.subscribe(function (ev) {
         // TODO: push single event to sync server
         try {
+          function makeUuid() {
+            if (typeof crypto !== 'undefined' && crypto.randomUUID) {
+              return crypto.randomUUID();
+            }
+            return 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, function(c) {
+              var r = Math.random() * 16 | 0;
+              var v = c === 'x' ? r : (r & 0x3 | 0x8);
+              return v.toString(16);
+            });
+          }
+
+          // Build a full event object here. Elm sends a minimal object (no uuid/timestamp).
+          var nowMs = Date.now();
+          var eventUuid = ev && ev.uuid ? ev.uuid : makeUuid();
+          var timestamp = ev && ev.timestamp ? ev.timestamp : nowMs;
+          var userUuid = ev && ev.userUuid ? ev.userUuid : "me";
+          var itemUuid = ev && ev.itemUuid ? ev.itemUuid : (ev && ev.item) ? ev.item : null;
+          var action = ev && ev.action ? ev.action : "completeChore";
+          var payload = ev && ev.payload ? ev.payload : "{}";
+
+          if (typeof payload !== "string") {
+            try {
+              payload = JSON.stringify(payload);
+            } catch (e) {
+              payload = String(payload);
+            }
+          }
+
+          var fullEv = {
+            uuid: eventUuid,
+            timestamp: timestamp,
+            userUuid: userUuid,
+            itemUuid: itemUuid,
+            action: action,
+            payload: payload
+          };
+
           // Load existing persisted history (fall back to defaults if corrupt/missing)
           var persisted = localStorage.getItem(storageKey);
           var historyArr;
@@ -103,7 +140,7 @@
           }
 
           // Append the new event object
-          historyArr.push(ev);
+          historyArr.push(fullEv);
 
           // Persist updated history
           localStorage.setItem(storageKey, JSON.stringify(historyArr));

@@ -262,17 +262,13 @@ update msg model =
 
         ToggleComplete choreUuid ->
             let
-                eventUuid =
-                    "elm-" ++ choreUuid ++ "-" ++ String.fromInt (Time.posixToMillis model.currentTime)
-
+                -- Send a minimal event payload to JS; JS will attach uuid/timestamp and persist the full event.
                 payloadStr =
-                    Encode.encode 0 (Encode.object [ ( "timestamp", Encode.int (Time.posixToMillis model.currentTime) ) ])
+                    Encode.encode 0 (Encode.object [])
 
                 ev =
                     Encode.object
-                        [ ( "uuid", Encode.string eventUuid )
-                        , ( "timestamp", Encode.int (Time.posixToMillis model.currentTime) )
-                        , ( "userUuid", Encode.string "me" )
+                        [ ( "userUuid", Encode.string "me" )
                         , ( "itemUuid", Encode.string choreUuid )
                         , ( "action", Encode.string "completeChore" )
                         , ( "payload", Encode.string payloadStr )
