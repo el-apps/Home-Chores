@@ -296,7 +296,7 @@ view model =
                 , button [ onClick AddChoreClicked ] [ text "Add" ]
                 ]
             ]
-        , ul []
+        , div [ class "chores" ]
             (List.map (viewChore model.currentTime model.choreCompletions) (sortChores model))
         ]
 
