@@ -36,6 +36,10 @@ type Chore
         , name : String
         , day : Time.Weekday
         }
+    | OneTime
+        { uuid : String
+        , name : String
+        }
 
 
 type alias ChoreCompletion =
@@ -103,6 +107,18 @@ viewChore chore =
                 [ header []
                     [ h2 [] [ text name ]
                     , text ("Weekly - " ++ dayName day)
+                    ]
+                , div [] [ text "Needs Done" ]
+
+                -- TODO: add button to mark chore done
+                -- , button [] [ text "Mark as complete" ]
+                ]
+
+        OneTime { name } ->
+            article []
+                [ header []
+                    [ h2 [] [ text name ]
+                    , text "One-time"
                     ]
                 , div [] [ text "Needs Done" ]
 
