@@ -261,12 +261,21 @@ view model =
     node "main"
         [ class "container" ]
         (nav [] [ ul [] [ h1 [] [ text "Chores" ] ] ]
-            :: List.map viewChore model.chores
+            :: List.map (viewChore model.completedChores) model.chores
         )
 
 
-viewChore : Chore -> Html msg
-viewChore chore =
+viewChore : List ChoreCompletion -> Chore -> Html msg
+viewChore completions chore =
+    let
+        completed =
+            case chore of
+                RepeatedWeekly { uuid } ->
+                    isWeeklyCompleted completions uuid
+
+                OneTime { uuid } ->
+                    isOneTimeCompleted completions uuid
+    in
     case chore of
         RepeatedWeekly { name, day } ->
             article []
@@ -274,7 +283,7 @@ viewChore chore =
                     [ h2 [] [ text name ]
                     , text ("Weekly - " ++ dayName day)
                     ]
-                , div [] [ text "Needs Done" ]
+                , div [] [ text (if completed then "Done" else "Needs Done") ]
 
                 -- TODO: add button to mark chore done
                 -- , button [] [ text "Mark as complete" ]
@@ -284,7 +293,7 @@ viewChore chore =
             article []
                 [ header []
                     [ h2 [] [ text name ] ]
-                , div [] [ text "Needs Done" ]
+                , div [] [ text (if completed then "Done" else "Needs Done") ]
 
                 -- TODO: add button to mark chore done
                 -- , button [] [ text "Mark as complete" ]
@@ -314,6 +323,43 @@ dayName day =
 
         Time.Sun ->
             "Sunday"
+
+
+weekMillis : Int
+weekMillis =
+    7 * 24 * 60 * 60 * 1000
+
+
+maxCompletionMillis : List ChoreCompletion -> Int
+maxCompletionMillis completions =
+    List.foldl (\c acc -> Basics.max acc (Time.posixToMillis c.timestamp)) 0 completions
+
+
+isWeeklyCompleted : List ChoreCompletion -> String -> Bool
+isWeeklyCompleted completions choreUuid =
+    let
+        maxMs =
+            maxCompletionMillis completions
+
+        cutoff =
+            maxMs - weekMillis
+    in
+    List.any (\c -> c.choreUuid == choreUuid && Time.posixToMillis c.timestamp >= cutoff) completions
+
+
+isOneTimeCompleted : List ChoreCompletion -> String -> Bool
+isOneTimeCompleted completions choreUuid =
+    List.any (\c -> c.choreUuid == choreUuid) completions
+
+
+isCompleted : List ChoreCompletion -> Chore -> Bool
+isCompleted completions chore =
+    case chore of
+        RepeatedWeekly { uuid } ->
+            isWeeklyCompleted completions uuid
+
+        OneTime { uuid } ->
+            isOneTimeCompleted completions uuid
 
 
 
