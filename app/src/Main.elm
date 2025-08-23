@@ -14,7 +14,7 @@ import Time
 -- MAIN
 
 
-main : Program Int Model Msg
+main : Program () Model Msg
 main =
     Browser.element { init = init, view = view, update = update, subscriptions = subscriptions }
 
@@ -71,13 +71,9 @@ type alias Model =
     }
 
 
-init : Int -> ( Model, Cmd Msg )
-init nowMillis =
-    let
-        nowPosix =
-            Time.millisToPosix nowMillis
-    in
-    ( Model [] [] nowPosix
+init : () -> ( Model, Cmd Msg )
+init () =
+    ( Model [] [] (Time.millisToPosix 0)
     , Cmd.none
     )
 
@@ -126,12 +122,6 @@ updatePayloadDecoder =
     Decode.map2 Tuple.pair
         (Decode.field "field" Decode.string)
         (Decode.field "value" Decode.string)
-
-
-completePayloadDecoder : Decode.Decoder Time.Posix
-completePayloadDecoder =
-    Decode.field "timestamp" Decode.int
-        |> Decode.map Time.millisToPosix
 
 
 weekdayFromString : String -> Maybe Time.Weekday
@@ -196,14 +186,9 @@ buildModelFromEvents currentTime events =
                             ( items, completionsAccumulator )
 
                 "completeChore" ->
-                    case Decode.decodeString completePayloadDecoder event.payload of
-                        Ok ts ->
-                            ( items
-                            , { choreUuid = event.itemUuid, timestamp = ts } :: completionsAccumulator
-                            )
-
-                        Err _ ->
-                            ( items, completionsAccumulator )
+                    ( items
+                    , { choreUuid = event.itemUuid, timestamp = event.timestamp } :: completionsAccumulator
+                    )
 
                 _ ->
                     ( items, completionsAccumulator )
@@ -274,7 +259,7 @@ update msg model =
                     [ ( "userUuid", Encode.string "me" )
                     , ( "itemUuid", Encode.string choreUuid )
                     , ( "action", Encode.string "completeChore" )
-                    , ( "payload", Encode.object [] )
+                    , ( "payload", Encode.object [ ( "timestamp", model.currentTime |> Time.posixToMillis |> Encode.int ) ] )
                     ]
                 )
             )
@@ -290,9 +275,7 @@ view model =
         [ class "container" ]
         [ nav []
             [ ul []
-                [ h1 [] [ text "Chores" ]
-                , p [] [ text ("Current time: " ++ String.fromInt (Time.posixToMillis model.currentTime)) ]
-                ]
+                [ h1 [] [ text "Chores" ] ]
             ]
         , ul []
             (List.map (viewChore model.currentTime model.choreCompletions) model.chores)

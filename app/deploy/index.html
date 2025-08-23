@@ -41,7 +41,7 @@
       events.push(ev("e2", t++, TRASH, "updateChore", JSON.stringify({ field: "type", value: "repeated_weekly" })));
       events.push(ev("e3", t++, TRASH, "updateChore", JSON.stringify({ field: "name", value: "Take out the trash" })));
       events.push(ev("e4", t++, TRASH, "updateChore", JSON.stringify({ field: "day", value: "Wed" })));
-      events.push(ev("e5", t++, TRASH, "completeChore", JSON.stringify({ timestamp: now - 3 * dayMs })));
+      events.push(ev("e5", t++, TRASH, "completeChore", ""));
 
       var MOW = "228a6965-28e2-4026-b6a9-6c0cc4a57026";
       events.push(ev("e6", t++, MOW, "addChore", ""));
@@ -81,16 +81,15 @@
 
       var app = Elm.Main.init({
         node: document.getElementById('root'),
-        flags: Date.now()
       });
 
       // Send initial event history to app
       app.ports.onNewHistory.send(historyArr);
 
       // Start sending current time ticks to Elm (ms since epoch) every second
-      if (app.ports && app.ports.currentTime) {
-        app.ports.currentTime.send(Date.now());
-        setInterval(function () { app.ports.currentTime.send(Date.now()); }, 1000);
+      if (app.ports && app.ports.receiveCurrentTime) {
+        app.ports.receiveCurrentTime.send(Date.now());
+        setInterval(function () { app.ports.receiveCurrentTime.send(Date.now()); }, 1000);
       }
 
       // When Elm sends a single new event, let JS generate uuid/timestamp, persist, and echo back the latest history
