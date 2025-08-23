@@ -87,6 +87,12 @@
       // Send initial event history to app
       app.ports.onNewHistory.send(historyArr);
 
+      // Start sending current time ticks to Elm (ms since epoch) every second
+      if (app.ports && app.ports.currentTime) {
+        app.ports.currentTime.send(Date.now());
+        setInterval(function () { app.ports.currentTime.send(Date.now()); }, 1000);
+      }
+
       // When Elm sends a single new event, let JS generate uuid/timestamp, persist, and echo back the latest history
       app.ports.newEvent.subscribe(function (ev) {
         // TODO: push single event to sync server

@@ -29,6 +29,9 @@ port newEvent : Value -> Cmd msg
 port onNewHistory : (Value -> msg) -> Sub msg
 
 
+port currentTime : (Int -> msg) -> Sub msg
+
+
 
 -- MODEL
 
@@ -243,6 +246,7 @@ type Msg
     = NewHistory Value
     | AddChore Chore
     | ToggleComplete String
+    | TickTime Int
 
 
 update : Msg -> Model -> ( Model, Cmd Msg )
@@ -256,6 +260,9 @@ update msg model =
                 Err _ ->
                     ( model, Cmd.none )
 
+        TickTime nowMillis ->
+            ( { model | currentTime = Time.millisToPosix nowMillis }, Cmd.none )
+
         AddChore _ ->
             -- TODO: add chore
             ( model, Cmd.none )
@@ -267,7 +274,7 @@ update msg model =
                     [ ( "userUuid", Encode.string "me" )
                     , ( "itemUuid", Encode.string choreUuid )
                     , ( "action", Encode.string "completeChore" )
-                    , ( "payload", Encode.object [ ( "timestamp", Encode.int (Time.posixToMillis model.currentTime) ) ] )
+                    , ( "payload", Encode.object [] )
                     ]
                 )
             )
@@ -449,4 +456,7 @@ isCompleted currentTime completions chore =
 
 subscriptions : Model -> Sub Msg
 subscriptions _ =
-    onNewHistory NewHistory
+    Sub.batch
+        [ onNewHistory NewHistory
+        , currentTime TickTime
+        ]
