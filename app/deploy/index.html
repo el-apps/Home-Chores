@@ -69,15 +69,18 @@
       }
 
       // Load from localStorage if present, else use defaults
-      var persisted = localStorage.getItem(storageKey);
-      var historyArr;
-      try {
-        var parsed = persisted ? JSON.parse(persisted) : defaultEvents;
-        historyArr = isValidEvents(parsed) ? parsed : defaultEvents;
-      } catch (e) {
-        console.warn("Corrupt persisted data, falling back to defaults:", e);
-        historyArr = defaultEvents;
+      function loadHistory() {
+        var persisted = localStorage.getItem(storageKey);
+        try {
+          var parsed = persisted ? JSON.parse(persisted) : defaultEvents;
+          return isValidEvents(parsed) ? parsed.slice() : defaultEvents.slice();
+        } catch (e) {
+          console.warn("Corrupt persisted data, falling back to defaults:", e);
+          return defaultEvents.slice();
+        }
       }
+
+      var historyArr = loadHistory();
 
       var app = Elm.Main.init({
         node: document.getElementById('root'),
