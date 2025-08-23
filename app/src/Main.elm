@@ -72,6 +72,15 @@ init _ =
     )
 
 
+defaultChoreName : String
+defaultChoreName =
+    "New Chore"
+
+
+defaultChoreDay : Time.Weekday
+defaultChoreDay =
+    Time.Mon
+
 
 -- DECODERS
 
