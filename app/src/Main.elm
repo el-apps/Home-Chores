@@ -12,7 +12,7 @@ import Time
 -- MAIN
 
 
-main : Program () Model Msg
+main : Program Int Model Msg
 main =
     Browser.element { init = init, view = view, update = update, subscriptions = subscriptions }
 
