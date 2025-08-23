@@ -142,10 +142,6 @@ weekdayFromString s =
             Nothing
 
 
-type alias Attrs =
-    Dict String String
-
-
 buildModelFromEvents : List Event -> Model
 buildModelFromEvents events =
     let
