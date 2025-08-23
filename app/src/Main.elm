@@ -288,7 +288,12 @@ view : Model -> Html Msg
 view model =
     node "main"
         [ class "container" ]
-        [ nav [] [ ul [] [ h1 [] [ text "Chores" ] ] ]
+        [ nav []
+            [ ul []
+                [ h1 [] [ text "Chores" ]
+                , p [] [ text ("Current time: " ++ String.fromInt (Time.posixToMillis model.currentTime)) ]
+                ]
+            ]
         , ul []
             (List.map (viewChore model.currentTime model.choreCompletions) model.chores)
         ]
