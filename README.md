@@ -1,7 +1,7 @@
 # Home-Chores
 *A simple, self-hosted family chore tracker*
 
-Home-Chores is a lightweight web application for managing household tasks. Designed for families, it prioritizes offline functionality, data privacy, and seamless synchronization across devices without relying on third-party services.
+Home-Chores is a lightweight web application for managing household chores. Designed for families, it prioritizes offline functionality, data privacy, and seamless synchronization across devices without relying on third-party services.
 
 ![Elm](https://img.shields.io/badge/Elm-0.19.1-1293D8) ![simple-sync](https://img.shields.io/badge/simple--sync-Alpha-orange)
 
@@ -10,15 +10,15 @@ Home-Chores is a lightweight web application for managing household tasks. Desig
 ## Features
 
 ### 🎯 MVP
-- **Weekly chores**: Create repeating tasks that reset every week
+- **One-time chores**: Add non-repeating chores
 - **Offline-first**: Fully functional without internet connection
 - **Cross-device sync**: Automatic synchronization when devices reconnect
 - **Self-hosted**: Your data stays in your home (no third-party providers)
 
-### 🔜 Upcoming Versions
-- **One-time tasks**: Add non-repeating chores
-- **Task assignments**: Assign chores to family members
-- **Completion history**: Track who completed which tasks
+### 🔜 Future Ideas
+- **Weekly chores**: Create repeating tasks that reset every week
+- **Chore assignments**: Assign chores to family members
+- **Completion history**: Track who completed which chores
 
 ## Architecture
 
