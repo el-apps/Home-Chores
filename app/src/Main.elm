@@ -286,7 +286,7 @@ view model =
     node "main"
         [ class "container" ]
         [ nav []
-            [ ul [ Html.Attributes.style [ ( "display", "flex" ), ( "justify-content", "space-between" ), ( "align-items", "center" ) ] ]
+            [ ul []
                 [ h1 [] [ text "Chores" ]
                 , button [ onClick AddChoreClicked ] [ text "Add" ]
                 ]
