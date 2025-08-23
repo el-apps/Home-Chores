@@ -82,6 +82,7 @@ defaultChoreDay =
     Time.Mon
 
 
+
 -- DECODERS
 
 
@@ -212,21 +213,14 @@ buildModelFromEvents events =
                                 |> Maybe.andThen weekdayFromString
                                 |> Maybe.withDefault defaultChoreDay
                     in
-                    Just ( RepeatedWeekly { uuid = uuid, name = name, day = day } )
-
-                Just "one_time" ->
-                    let
-                        name =
-                            Maybe.withDefault defaultChoreName (Dict.get "name" attrs)
-                    in
-                    Just ( OneTime { uuid = uuid, name = name } )
+                    Just (RepeatedWeekly { uuid = uuid, name = name, day = day })
 
                 _ ->
                     let
                         name =
                             Maybe.withDefault defaultChoreName (Dict.get "name" attrs)
                     in
-                    Just ( OneTime { uuid = uuid, name = name } )
+                    Just (OneTime { uuid = uuid, name = name })
     in
     { chores = choresDict |> Dict.toList |> List.filterMap toChore
     , completedChores = List.reverse completions
