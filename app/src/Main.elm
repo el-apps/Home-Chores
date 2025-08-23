@@ -266,9 +266,10 @@ view : Model -> Html Msg
 view model =
     node "main"
         [ class "container" ]
-        (nav [] [ ul [] [ h1 [] [ text "Chores" ] ] ]
-            :: List.map (viewChore model.currentTime model.choreCompletions) model.chores
-        )
+        [ nav [] [ ul [] [ h1 [] [ text "Chores" ] ] ]
+        , ul []
+            (List.map (viewChore model.currentTime model.choreCompletions) model.chores)
+        ]
 
 
 viewChore : Time.Posix -> List ChoreCompletion -> Chore -> Html msg
@@ -295,21 +296,19 @@ viewChore currentTime completions chore =
         statusCheckbox =
             input [ type_ "checkbox", checked completed, disabled True ] []
     in
-    article []
-        [ header []
+    li []
+        [ div []
             [ h2 [] [ text title ]
             , case maybeSubtitle of
                 Just s ->
-                    text (" " ++ s)
+                    span [] [ text (" " ++ s) ]
 
                 Nothing ->
                     text ""
             ]
-        , div []
-            [ label []
-                [ statusCheckbox
-                , text (" " ++ statusText)
-                ]
+        , label []
+            [ statusCheckbox
+            , text (" " ++ statusText)
             ]
         ]
 
