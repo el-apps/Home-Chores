@@ -65,16 +65,16 @@ type alias ChoreCompletion =
 
 
 type alias Model =
-    { chores : List Chore
+    { currentTime : Time.Posix
+    , chores : List Chore
     , choreCompletions : List ChoreCompletion
-    , currentTime : Time.Posix
-    , choreCreated : Dict String Int
+    , choreCreationTimestamps : Dict String Int
     }
 
 
 init : () -> ( Model, Cmd Msg )
 init () =
-    ( Model [] [] (Time.millisToPosix 0) Dict.empty
+    ( Model (Time.millisToPosix 0) [] [] Dict.empty
     , Cmd.none
     )
 
@@ -159,14 +159,14 @@ buildModelFromEvents currentTime events =
         sorted =
             List.sortBy (\e -> Time.posixToMillis e.timestamp) events
 
-        step event ( items, completionsAccumulator, createdDict ) =
+        step event ( items, completionsAccumulator, choreCreationTimestamps ) =
             case event.action of
                 "addChore" ->
                     ( Dict.update event.itemUuid
                         (\maybe -> Just (Maybe.withDefault Dict.empty maybe))
                         items
                     , completionsAccumulator
-                    , Dict.insert event.itemUuid (Time.posixToMillis event.timestamp) createdDict
+                    , Dict.insert event.itemUuid (Time.posixToMillis event.timestamp) choreCreationTimestamps
                     )
 
                 "updateChore" ->
@@ -182,20 +182,20 @@ buildModelFromEvents currentTime events =
                                 )
                                 items
                             , completionsAccumulator
-                            , createdDict
+                            , choreCreationTimestamps
                             )
 
                         Err _ ->
-                            Debug.log ("failed to decode updateChore payload: " ++ event.payload) ( items, completionsAccumulator, createdDict )
+                            Debug.log ("failed to decode updateChore payload: " ++ event.payload) ( items, completionsAccumulator, choreCreationTimestamps )
 
                 "completeChore" ->
                     ( items
                     , { choreUuid = event.itemUuid, timestamp = event.timestamp } :: completionsAccumulator
-                    , createdDict
+                    , choreCreationTimestamps
                     )
 
                 _ ->
-                    Debug.log ("unknown event action: " ++ event.action) ( items, completionsAccumulator, createdDict )
+                    Debug.log ("unknown event action: " ++ event.action) ( items, completionsAccumulator, choreCreationTimestamps )
 
         ( choresDict, completions, createdDict ) =
             List.foldl step ( Dict.empty, [], Dict.empty ) sorted
@@ -224,7 +224,7 @@ buildModelFromEvents currentTime events =
     { chores = choresDict |> Dict.toList |> List.filterMap toChore
     , choreCompletions = List.reverse completions
     , currentTime = currentTime
-    , choreCreated = createdDict
+    , choreCreationTimestamps = createdDict
     }
 
 
@@ -460,6 +460,7 @@ isCompleted currentTime completions chore =
 
 -- helper: sort chores by completion (incomplete first) then by creation timestamp
 
+
 sortChores : Model -> List Chore
 sortChores model =
     let
@@ -474,6 +475,7 @@ sortChores model =
         completionScore chore =
             if isCompleted model.currentTime model.choreCompletions chore then
                 1
+
             else
                 0
 
@@ -486,10 +488,10 @@ sortChores model =
                     completionScore b
 
                 createdA =
-                    Dict.get (getUuid a) model.choreCreated |> Maybe.withDefault 0
+                    Dict.get (getUuid a) model.choreCreationTimestamps |> Maybe.withDefault 0
 
                 createdB =
-                    Dict.get (getUuid b) model.choreCreated |> Maybe.withDefault 0
+                    Dict.get (getUuid b) model.choreCreationTimestamps |> Maybe.withDefault 0
             in
             case Basics.compare scoreA scoreB of
                 EQ ->
@@ -499,6 +501,7 @@ sortChores model =
                     other
     in
     List.sortWith compareChores model.chores
+
 
 
 -- SUBSCRIPTIONS
