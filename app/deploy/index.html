@@ -18,37 +18,76 @@
     <script>
       var storageKey = "store";
 
-      // Some dummy initial data to bootstrap the app
-      var defaultData = {
-        chores: [
-          { type: "repeated_weekly", uuid: "c892a6cb-cfbc-4d05-8888-28b54f0ffe90", name: "Take out the trash", day: "Wed" },
-          { type: "repeated_weekly", uuid: "228a6965-28e2-4026-b6a9-6c0cc4a57026", name: "Mow the yard", day: "Tue" },
-          { type: "one_time", uuid: "37d8e82b-bf25-4da6-85a7-5fb6c76b5002", name: "Allow the user to add one-time chores" }
-        ],
-        completedChores: [
-          { choreUuid: "c892a6cb-cfbc-4d05-8888-28b54f0ffe90", timestamp: Date.now() - 2 * 24 * 60 * 60 * 1000 }
-        ]
-      };
+      // Build some dummy event history to bootstrap the app
+      var now = Date.now();
+      var dayMs = 24 * 60 * 60 * 1000;
+
+      function ev(uuid, ts, itemUuid, action, payload) {
+        return {
+          uuid: uuid,
+          timestamp: ts,
+          userUuid: "demo",
+          itemUuid: itemUuid,
+          action: action,
+          payload: payload
+        };
+      }
+
+      var events = [];
+      var t = now - 5 * dayMs;
+
+      var TRASH = "c892a6cb-cfbc-4d05-8888-28b54f0ffe90";
+      events.push(ev("e1", t++, TRASH, "addChore", ""));
+      events.push(ev("e2", t++, TRASH, "updateChore", JSON.stringify({ field: "type", value: "repeated_weekly" })));
+      events.push(ev("e3", t++, TRASH, "updateChore", JSON.stringify({ field: "name", value: "Take out the trash" })));
+      events.push(ev("e4", t++, TRASH, "updateChore", JSON.stringify({ field: "day", value: "Wed" })));
+      events.push(ev("e5", t++, TRASH, "completeChore", JSON.stringify({ timestamp: now - 2 * dayMs })));
+
+      var MOW = "228a6965-28e2-4026-b6a9-6c0cc4a57026";
+      events.push(ev("e6", t++, MOW, "addChore", ""));
+      events.push(ev("e7", t++, MOW, "updateChore", JSON.stringify({ field: "type", value: "repeated_weekly" })));
+      events.push(ev("e8", t++, MOW, "updateChore", JSON.stringify({ field: "name", value: "Mow the yard" })));
+      events.push(ev("e9", t++, MOW, "updateChore", JSON.stringify({ field: "day", value: "Tue" })));
+
+      var ONE = "37d8e82b-bf25-4da6-85a7-5fb6c76b5002";
+      events.push(ev("e10", t++, ONE, "addChore", ""));
+      events.push(ev("e11", t++, ONE, "updateChore", JSON.stringify({ field: "type", value: "one_time" })));
+      events.push(ev("e12", t++, ONE, "updateChore", JSON.stringify({ field: "name", value: "Allow the user to add one-time chores" })));
+
+      var defaultEvents = events;
+
+      function isValidEvents(x) {
+        return Array.isArray(x) && x.every(function (ev) {
+          return ev && typeof ev === "object"
+            && "uuid" in ev
+            && "timestamp" in ev
+            && "userUuid" in ev
+            && "itemUuid" in ev
+            && "action" in ev
+            && "payload" in ev;
+        });
+      }
 
       // Load from localStorage if present, else use defaults
       var persisted = localStorage.getItem(storageKey);
-      var historyObj;
+      var historyArr;
       try {
-        historyObj = persisted ? JSON.parse(persisted) : defaultData;
+        var parsed = persisted ? JSON.parse(persisted) : defaultEvents;
+        historyArr = isValidEvents(parsed) ? parsed : defaultEvents;
       } catch (e) {
         console.warn("Corrupt persisted data, falling back to defaults:", e);
-        historyObj = defaultData;
+        historyArr = defaultEvents;
       }
 
       var app = Elm.Main.init({
         node: document.getElementById('root'),
       });
 
-      // Send initial history to app
-      app.ports.onNewHistory.send(historyObj);
+      // Send initial event history to app
+      app.ports.onNewHistory.send(historyArr);
 
       // When Elm asks to push data, persist it and echo back as the latest history
-      app.ports.pushData.subscribe(function(val) {
+      app.ports.pushData.subscribe(function (val) {
         // TODO: push data to sync server
         try {
           localStorage.setItem(storageKey, JSON.stringify(val));
