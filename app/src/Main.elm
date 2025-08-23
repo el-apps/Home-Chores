@@ -267,15 +267,15 @@ view model =
     node "main"
         [ class "container" ]
         (nav [] [ ul [] [ h1 [] [ text "Chores" ] ] ]
-            :: List.map (viewChore model.choreCompletions) model.chores
+            :: List.map (viewChore model.currentTime model.choreCompletions) model.chores
         )
 
 
-viewChore : List ChoreCompletion -> Chore -> Html msg
-viewChore completions chore =
+viewChore : Time.Posix -> List ChoreCompletion -> Chore -> Html msg
+viewChore currentTime completions chore =
     let
         completed =
-            isCompleted completions chore
+            isCompleted currentTime completions chore
     in
     case chore of
         RepeatedWeekly { name, day } ->
@@ -391,17 +391,17 @@ weekdayToIndex wd =
             6
 
 
-isWeeklyCompleted : List ChoreCompletion -> String -> Time.Weekday -> Bool
-isWeeklyCompleted completions choreUuid day =
+isWeeklyCompleted : Time.Posix -> List ChoreCompletion -> String -> Time.Weekday -> Bool
+isWeeklyCompleted currentTime completions choreUuid day =
     let
-        maxMs =
-            maxCompletionMillis completions
+        currentMs =
+            Time.posixToMillis currentTime
 
-        -- number of days since epoch at maxMs
+        -- number of days since epoch at currentMs
         dayCount =
-            Basics.truncate (toFloat maxMs / toFloat dayMillis)
+            Basics.truncate (toFloat currentMs / toFloat dayMillis)
 
-        -- weekday index for the day corresponding to maxMs (Mon=0..Sun=6)
+        -- weekday index for the day corresponding to currentMs (Mon=0..Sun=6)
         currentDayIndex =
             Basics.modBy 7 (epochWeekdayIndex + dayCount)
 
@@ -419,7 +419,7 @@ isWeeklyCompleted completions choreUuid day =
                 diff
 
         cutoff =
-            maxMs - (daysSince * dayMillis)
+            currentMs - (daysSince * dayMillis)
     in
     List.any (\c -> c.choreUuid == choreUuid && Time.posixToMillis c.timestamp >= cutoff) completions
 
@@ -429,11 +429,11 @@ isOneTimeCompleted completions choreUuid =
     List.any (\c -> c.choreUuid == choreUuid) completions
 
 
-isCompleted : List ChoreCompletion -> Chore -> Bool
-isCompleted completions chore =
+isCompleted : Time.Posix -> List ChoreCompletion -> Chore -> Bool
+isCompleted currentTime completions chore =
     case chore of
         RepeatedWeekly { uuid, day } ->
-            isWeeklyCompleted completions uuid day
+            isWeeklyCompleted currentTime completions uuid day
 
         OneTime { uuid } ->
             isOneTimeCompleted completions uuid
