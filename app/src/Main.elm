@@ -183,7 +183,7 @@ buildModelFromEvents currentTime events =
                             )
 
                         Err _ ->
-                            ( items, completionsAccumulator )
+                            Debug.log ("failed to decode updateChore payload: " ++ event.payload) ( items, completionsAccumulator )
 
                 "completeChore" ->
                     ( items
@@ -191,7 +191,7 @@ buildModelFromEvents currentTime events =
                     )
 
                 _ ->
-                    ( items, completionsAccumulator )
+                    Debug.log ("unknown event action: " ++ event.action) ( items, completionsAccumulator )
 
         ( choresDict, completions ) =
             List.foldl step ( Dict.empty, [] ) sorted
