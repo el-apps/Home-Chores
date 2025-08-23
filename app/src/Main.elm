@@ -293,7 +293,7 @@ viewChore currentTime completions chore =
     div []
         [ label []
             [ statusCheckbox
-            , div [ style [ ( "display", "flex" ), ( "flex-direction", "column" ) ] ]
+            , div [ Html.Attributes.style [ ( "display", "flex" ), ( "flex-direction", "column" ) ] ]
                 ([ div [] [ text title ] ]
                     ++ (case maybeSubtitle of
                             Just s ->
