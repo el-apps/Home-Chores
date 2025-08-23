@@ -261,20 +261,16 @@ update msg model =
             ( model, Cmd.none )
 
         ToggleComplete choreUuid ->
-            let
-                -- Send a minimal event payload to JS; JS will attach uuid/timestamp and persist the full event.
-                payloadStr =
-                    Encode.encode 0 (Encode.object [])
-
-                ev =
-                    Encode.object
-                        [ ( "userUuid", Encode.string "me" )
-                        , ( "itemUuid", Encode.string choreUuid )
-                        , ( "action", Encode.string "completeChore" )
-                        , ( "payload", Encode.string payloadStr )
-                        ]
-            in
-            ( model, newEvent ev )
+            ( model
+            , newEvent
+                (Encode.object
+                    [ ( "userUuid", Encode.string "me" )
+                    , ( "itemUuid", Encode.string choreUuid )
+                    , ( "action", Encode.string "completeChore" )
+                    , ( "payload", Encode.object [ ( "timestamp", Encode.int (Time.posixToMillis model.currentTime) ) ] )
+                    ]
+                )
+            )
 
 
 

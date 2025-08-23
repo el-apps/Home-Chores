@@ -103,9 +103,8 @@
           }
 
           // Build a full event object here. Elm sends a minimal object (no uuid/timestamp).
-          var nowMs = Date.now();
-          var eventUuid = ev && ev.uuid ? ev.uuid : makeUuid();
-          var timestamp = ev && ev.timestamp ? ev.timestamp : nowMs;
+          var eventUuid = makeUuid();
+          var timestamp = Date.now();
           var userUuid = ev && ev.userUuid ? ev.userUuid : "me";
           var itemUuid = ev && ev.itemUuid ? ev.itemUuid : (ev && ev.item) ? ev.item : null;
           var action = ev && ev.action ? ev.action : "completeChore";
@@ -139,6 +138,7 @@
             historyArr = defaultEvents.slice();
           }
 
+console.log(fullEv);
           // Append the new event object
           historyArr.push(fullEv);
 
@@ -146,6 +146,7 @@
           localStorage.setItem(storageKey, JSON.stringify(historyArr));
 
           // Send new history to app
+          console.log(historyArr);
           app.ports.onNewHistory.send(historyArr);
         } catch (e) {
           console.warn("Failed to persist data to localStorage:", e);
