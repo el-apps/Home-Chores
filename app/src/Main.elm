@@ -4,6 +4,8 @@ import Browser
 import Dict exposing (Dict)
 import Html exposing (..)
 import Html.Attributes exposing (..)
+import Html.Events exposing (onClick)
+import Json.Encode as Encode
 import Json.Decode as Decode exposing (Value)
 import Time
 
@@ -240,6 +242,7 @@ buildModelFromEvents currentTime events =
 type Msg
     = NewHistory Value
     | AddChore Chore
+    | ToggleComplete String
 
 
 update : Msg -> Model -> ( Model, Cmd Msg )
@@ -257,6 +260,26 @@ update msg model =
             -- TODO: add chore
             ( model, Cmd.none )
 
+        ToggleComplete choreUuid ->
+            let
+                eventUuid =
+                    "elm-" ++ choreUuid ++ "-" ++ String.fromInt (Time.posixToMillis model.currentTime)
+
+                payloadStr =
+                    Encode.encode 0 (Encode.object [ ( "timestamp", Encode.int (Time.posixToMillis model.currentTime) ) ])
+
+                ev =
+                    Encode.object
+                        [ ( "uuid", Encode.string eventUuid )
+                        , ( "timestamp", Encode.int (Time.posixToMillis model.currentTime) )
+                        , ( "userUuid", Encode.string "me" )
+                        , ( "itemUuid", Encode.string choreUuid )
+                        , ( "action", Encode.string "completeChore" )
+                        , ( "payload", Encode.string payloadStr )
+                        ]
+            in
+            ( model, newEvent ev )
+
 
 
 -- VIEW
@@ -272,23 +295,23 @@ view model =
         ]
 
 
-viewChore : Time.Posix -> List ChoreCompletion -> Chore -> Html msg
+viewChore : Time.Posix -> List ChoreCompletion -> Chore -> Html Msg
 viewChore currentTime completions chore =
     let
         completed =
             isCompleted currentTime completions chore
 
-        -- normalize a chore into a common title and optional subtitle
-        ( title, maybeSubtitle ) =
+        -- normalize a chore into a common uuid, title and optional subtitle
+        ( uuid, title, maybeSubtitle ) =
             case chore of
-                RepeatedWeekly { name, day } ->
-                    ( name, Just ("Weekly - " ++ dayName day) )
+                RepeatedWeekly { uuid, name, day } ->
+                    ( uuid, name, Just ("Weekly - " ++ dayName day) )
 
-                OneTime { name } ->
-                    ( name, Nothing )
+                OneTime { uuid, name } ->
+                    ( uuid, name, Nothing )
 
         statusCheckbox =
-            input [ type_ "checkbox", checked completed ] []
+            input [ type_ "checkbox", checked completed, onClick (ToggleComplete uuid) ] []
     in
     div [ class "chore" ]
         [ label []
