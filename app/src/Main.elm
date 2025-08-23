@@ -287,28 +287,16 @@ viewChore currentTime completions chore =
                 OneTime { name } ->
                     ( name, Nothing )
 
-        statusText =
-            if completed then
-                "Done"
-            else
-                "Needs Done"
-
         statusCheckbox =
-            input [ type_ "checkbox", checked completed, disabled True ] []
+            input [ type_ "checkbox", checked completed ] []
     in
-    li []
-        [ div []
-            [ h2 [] [ text title ]
-            , case maybeSubtitle of
-                Just s ->
-                    span [] [ text (" " ++ s) ]
-
-                Nothing ->
-                    text ""
-            ]
-        , label []
+    div []
+        [ label []
             [ statusCheckbox
-            , text (" " ++ statusText)
+            , div []
+                [ text title
+                , text maybeSubtitle
+                ]
             ]
         ]
 
