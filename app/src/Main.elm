@@ -61,7 +61,7 @@ type alias ChoreCompletion =
 
 type alias Model =
     { chores : List Chore
-    , completedChores : List ChoreCompletion
+    , choreCompletions : List ChoreCompletion
     }
 
 
@@ -223,7 +223,7 @@ buildModelFromEvents events =
                     Just (OneTime { uuid = uuid, name = name })
     in
     { chores = choresDict |> Dict.toList |> List.filterMap toChore
-    , completedChores = List.reverse completions
+    , choreCompletions = List.reverse completions
     }
 
 
@@ -261,7 +261,7 @@ view model =
     node "main"
         [ class "container" ]
         (nav [] [ ul [] [ h1 [] [ text "Chores" ] ] ]
-            :: List.map (viewChore model.completedChores) model.chores
+            :: List.map (viewChore model.choreCompletions) model.chores
         )
 
 
@@ -346,7 +346,10 @@ dayMillis =
     24 * 60 * 60 * 1000
 
 
+
 -- 1970-01-01 was a Thursday; using Mon=0..Sun=6 so Thu == 3
+
+
 epochWeekdayIndex : Int
 epochWeekdayIndex =
     3
@@ -405,6 +408,7 @@ isWeeklyCompleted completions choreUuid day =
         daysSince =
             if diff < 0 then
                 diff + 7
+
             else
                 diff
 
