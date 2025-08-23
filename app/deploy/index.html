@@ -6,7 +6,7 @@
   <meta charset="UTF-8">
   <meta name="description" content="A simple web app for tracking chores around the home.">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-  <!-- TODO: add favicon -->
+  <!-- TODO(#10): add favicon -->
   <link rel="icon" href="/favicon.ico">
   <link rel="manifest" href="/app.webmanifest">
   <link rel="stylesheet" href="/pico.cyan.min.css">
@@ -83,6 +83,7 @@
     }
 
     var historyArr = loadHistory();
+    // TODO(#8): pull current history from simple-sync
 
     var app = Elm.Main.init({
       node: document.getElementById('root'),
@@ -99,7 +100,7 @@
 
     // When Elm sends a single new event, let JS generate uuid/timestamp, persist, and echo back the latest history
     app.ports.newEvent.subscribe(function (ev) {
-      // TODO: push single event to sync server
+      // TODO(#8): push single event to sync server
       try {
         function makeUuid() {
           if (typeof crypto !== 'undefined' && crypto.randomUUID) {

@@ -234,8 +234,7 @@ buildModelFromEvents currentTime events =
 
 type Msg
     = NewHistory Value
-    | AddChore Chore
-    | AddChoreClicked
+    | AddChore
     | ToggleComplete String
     | TickTime Int
 
@@ -254,11 +253,7 @@ update msg model =
         TickTime nowMillis ->
             ( { model | currentTime = Time.millisToPosix nowMillis }, Cmd.none )
 
-        AddChore _ ->
-            -- TODO: add chore
-            ( model, Cmd.none )
-
-        AddChoreClicked ->
+        AddChore ->
             ( model
             , newEvent
                 (Encode.object
@@ -293,7 +288,7 @@ view model =
         [ nav []
             [ ul []
                 [ h1 [] [ text "Chores" ]
-                , button [ onClick AddChoreClicked ] [ text "Add" ]
+                , button [ onClick AddChore ] [ text "Add" ]
                 ]
             ]
         , div [ class "chores" ]
@@ -319,6 +314,7 @@ viewChore currentTime completions chore =
         statusCheckbox =
             input [ type_ "checkbox", checked completed, onClick (ToggleComplete choreUuid) ] []
     in
+    -- TODO(#9): allow the user to tap on the chore and edit it.
     div [ class "chore" ]
         [ label []
             [ statusCheckbox
