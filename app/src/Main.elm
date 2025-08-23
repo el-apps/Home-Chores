@@ -230,6 +230,7 @@ buildModelFromEvents currentTime events =
 type Msg
     = NewHistory Value
     | AddChore Chore
+    | AddChoreClicked
     | ToggleComplete String
     | TickTime Int
 
@@ -251,6 +252,17 @@ update msg model =
         AddChore _ ->
             -- TODO: add chore
             ( model, Cmd.none )
+
+        AddChoreClicked ->
+            ( model
+            , newEvent
+                (Encode.object
+                    [ ( "userUuid", Encode.string "me" )
+                    , ( "action", Encode.string "addChore" )
+                    , ( "payload", Encode.object [] )
+                    ]
+                )
+            )
 
         ToggleComplete choreUuid ->
             ( model
@@ -274,8 +286,10 @@ view model =
     node "main"
         [ class "container" ]
         [ nav []
-            [ ul []
-                [ h1 [] [ text "Chores" ] ]
+            [ ul [ Html.Attributes.style [ ( "display", "flex" ), ( "justify-content", "space-between" ), ( "align-items", "center" ) ] ]
+                [ h1 [] [ text "Chores" ]
+                , button [ onClick AddChoreClicked ] [ text "Add" ]
+                ]
             ]
         , ul []
             (List.map (viewChore model.currentTime model.choreCompletions) model.chores)

@@ -114,7 +114,7 @@
           var eventUuid = makeUuid();
           var timestamp = Date.now();
           var userUuid = ev && ev.userUuid ? ev.userUuid : "me";
-          var itemUuid = ev && ev.itemUuid ? ev.itemUuid : (ev && ev.item) ? ev.item : null;
+          var itemUuid = ev && ev.itemUuid ? ev.itemUuid : makeUuid();
           var action = ev && ev.action ? ev.action : "completeChore";
           var payload = ev && ev.payload ? ev.payload : "{}";
 
