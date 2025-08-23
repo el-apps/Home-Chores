@@ -341,19 +341,75 @@ weekMillis =
     7 * 24 * 60 * 60 * 1000
 
 
+dayMillis : Int
+dayMillis =
+    24 * 60 * 60 * 1000
+
+
+-- 1970-01-01 was a Thursday; using Mon=0..Sun=6 so Thu == 3
+epochWeekdayIndex : Int
+epochWeekdayIndex =
+    3
+
+
 maxCompletionMillis : List ChoreCompletion -> Int
 maxCompletionMillis completions =
     List.foldl (\c acc -> Basics.max acc (Time.posixToMillis c.timestamp)) 0 completions
 
 
-isWeeklyCompleted : List ChoreCompletion -> String -> Bool
-isWeeklyCompleted completions choreUuid =
+weekdayToIndex : Time.Weekday -> Int
+weekdayToIndex wd =
+    case wd of
+        Time.Mon ->
+            0
+
+        Time.Tue ->
+            1
+
+        Time.Wed ->
+            2
+
+        Time.Thu ->
+            3
+
+        Time.Fri ->
+            4
+
+        Time.Sat ->
+            5
+
+        Time.Sun ->
+            6
+
+
+isWeeklyCompleted : List ChoreCompletion -> String -> Time.Weekday -> Bool
+isWeeklyCompleted completions choreUuid day =
     let
         maxMs =
             maxCompletionMillis completions
 
+        -- number of days since epoch at maxMs
+        dayCount =
+            Basics.truncate (toFloat maxMs / toFloat dayMillis)
+
+        -- weekday index for the day corresponding to maxMs (Mon=0..Sun=6)
+        currentDayIndex =
+            Basics.modBy 7 (epochWeekdayIndex + dayCount)
+
+        targetIndex =
+            weekdayToIndex day
+
+        diff =
+            currentDayIndex - targetIndex
+
+        daysSince =
+            if diff < 0 then
+                diff + 7
+            else
+                diff
+
         cutoff =
-            maxMs - weekMillis
+            maxMs - (daysSince * dayMillis)
     in
     List.any (\c -> c.choreUuid == choreUuid && Time.posixToMillis c.timestamp >= cutoff) completions
 
@@ -366,8 +422,8 @@ isOneTimeCompleted completions choreUuid =
 isCompleted : List ChoreCompletion -> Chore -> Bool
 isCompleted completions chore =
     case chore of
-        RepeatedWeekly { uuid } ->
-            isWeeklyCompleted completions uuid
+        RepeatedWeekly { uuid, day } ->
+            isWeeklyCompleted completions uuid day
 
         OneTime { uuid } ->
             isOneTimeCompleted completions uuid
