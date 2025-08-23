@@ -290,19 +290,18 @@ viewChore currentTime completions chore =
         statusCheckbox =
             input [ type_ "checkbox", checked completed ] []
     in
-    div []
+    div [ class "chore" ]
         [ label []
             [ statusCheckbox
-            , div [ Html.Attributes.style [ ( "display", "flex" ), ( "flex-direction", "column" ) ] ]
-                ([ div [] [ text title ] ]
-                    ++ (case maybeSubtitle of
-                            Just s ->
-                                [ div [] [ text s ] ]
+            , div [ class "content" ]
+                [ div [ class "title" ] [ text title ]
+                , case maybeSubtitle of
+                    Just s ->
+                        div [ class "subtitle" ] [ text s ]
 
-                            Nothing ->
-                                []
-                       )
-                )
+                    Nothing ->
+                        text ""
+                ]
             ]
         ]
 
