@@ -59,6 +59,7 @@ init _ =
     ( Model
         [ RepeatedWeekly { uuid = "c892a6cb-cfbc-4d05-8888-28b54f0ffe90", name = "Take out the trash", day = Time.Wed }
         , RepeatedWeekly { uuid = "228a6965-28e2-4026-b6a9-6c0cc4a57026", name = "Mow the yard", day = Time.Tue }
+        , OneTime { uuid = "37d8e82b-bf25-4da6-85a7-5fb6c76b5002", name = "Allow the user to add one-time chores" }
         ]
         []
     , Cmd.none
@@ -117,9 +118,7 @@ viewChore chore =
         OneTime { name } ->
             article []
                 [ header []
-                    [ h2 [] [ text name ]
-                    , text "One-time"
-                    ]
+                    [ h2 [] [ text name ] ]
                 , div [] [ text "Needs Done" ]
 
                 -- TODO: add button to mark chore done
