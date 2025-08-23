@@ -198,11 +198,10 @@ buildModelFromEvents events =
                         name =
                             Maybe.withDefault "New Chore" (Dict.get "name" attrs)
 
-                        dayStr =
-                            Maybe.withDefault "Mon" (Dict.get "day" attrs)
-
                         day =
-                            Maybe.withDefault Time.Mon (weekdayFromString dayStr)
+                            Dict.get "day" attrs
+                                |> Maybe.andThen weekdayFromString
+                                |> Maybe.withDefault Time.Mon
                     in
                     Just ( RepeatedWeekly { uuid = uuid, name = name, day = day } )
 
