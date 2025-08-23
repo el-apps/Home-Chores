@@ -143,7 +143,6 @@
             historyArr = defaultEvents.slice();
           }
 
-console.log(fullEv);
           // Append the new event object
           historyArr.push(fullEv);
 
@@ -151,7 +150,6 @@ console.log(fullEv);
           localStorage.setItem(storageKey, JSON.stringify(historyArr));
 
           // Send new history to app
-          console.log(historyArr);
           app.ports.onNewHistory.send(historyArr);
         } catch (e) {
           console.warn("Failed to persist data to localStorage:", e);
