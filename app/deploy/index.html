@@ -86,17 +86,36 @@
       // Send initial event history to app
       app.ports.onNewHistory.send(historyArr);
 
-      // When Elm asks to push data, persist it and echo back as the latest history
-      app.ports.pushData.subscribe(function (val) {
-        // TODO: push data to sync server
+      // When Elm sends a single new event, append it to history, persist, and echo back the latest history
+      app.ports.newEvent.subscribe(function (ev) {
+        // TODO: push single event to sync server
         try {
-          localStorage.setItem(storageKey, JSON.stringify(val));
+          // Load existing persisted history (fall back to defaults if corrupt/missing)
+          var persisted = localStorage.getItem(storageKey);
+          var historyArr;
+          try {
+            var parsed = persisted ? JSON.parse(persisted) : defaultEvents;
+            historyArr = isValidEvents(parsed) ? parsed.slice() : defaultEvents.slice();
+          } catch (e) {
+            console.warn("Corrupt persisted data, falling back to defaults:", e);
+            historyArr = defaultEvents.slice();
+          }
+
+          // Append the new event object
+          historyArr.push(ev);
+
+          // Persist updated history
+          localStorage.setItem(storageKey, JSON.stringify(historyArr));
+
+          // Send new history to app
+          app.ports.onNewHistory.send(historyArr);
         } catch (e) {
           console.warn("Failed to persist data to localStorage:", e);
+          // Fallback: send defaults if possible
+          try {
+            app.ports.onNewHistory.send(defaultEvents);
+          } catch (e2) {}
         }
-
-        // Send new history to app
-        app.ports.onNewHistory.send(val);
       });
     </script>
   </body>

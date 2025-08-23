@@ -21,7 +21,7 @@ main =
 -- PORTS
 
 
-port pushData : Value -> Cmd msg
+port newEvent : Value -> Cmd msg
 
 
 port onNewHistory : (Value -> msg) -> Sub msg
