@@ -5,8 +5,8 @@ import Dict exposing (Dict)
 import Html exposing (..)
 import Html.Attributes exposing (..)
 import Html.Events exposing (onClick)
-import Json.Encode as Encode
 import Json.Decode as Decode exposing (Value)
+import Json.Encode as Encode
 import Time
 
 
@@ -302,7 +302,7 @@ viewChore currentTime completions chore =
             isCompleted currentTime completions chore
 
         -- normalize a chore into a common uuid, title and optional subtitle
-        ( uuid, title, maybeSubtitle ) =
+        ( choreUuid, title, maybeSubtitle ) =
             case chore of
                 RepeatedWeekly { uuid, name, day } ->
                     ( uuid, name, Just ("Weekly - " ++ dayName day) )
@@ -311,7 +311,7 @@ viewChore currentTime completions chore =
                     ( uuid, name, Nothing )
 
         statusCheckbox =
-            input [ type_ "checkbox", checked completed, onClick (ToggleComplete uuid) ] []
+            input [ type_ "checkbox", checked completed, onClick (ToggleComplete choreUuid) ] []
     in
     div [ class "chore" ]
         [ label []
